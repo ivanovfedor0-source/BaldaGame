@@ -4,3 +4,5 @@
 void botMakeMove();
 
 #endif
+
+// проверка
