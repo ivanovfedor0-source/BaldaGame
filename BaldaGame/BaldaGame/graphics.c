@@ -9,6 +9,7 @@
 static GLuint fontBase = 0;
 extern int selectedMenuItem;
 extern int selectingMode;
+extern int selectingDifficulty;
 extern char nameInput[20];
 
 void initFont() {
@@ -41,30 +42,27 @@ void drawString(float x, float y, const char* str) {
     glPopAttrib();
 }
 
-// Центрированный текст
 void drawCentered(float y, const char* str, float r, float g, float b) {
     glColor3f(r, g, b);
     float textWidth = strlen(str) * 0.028f;
     drawString(-textWidth / 2, y, str);
 }
 
-// Пункт меню: при выделении стрелка слева, текст сдвигается вправо
-void drawMenuItem(float y, const char* str, int isSelected) {
-    float baseX = -0.25f;
-
+// Универсальный пункт меню со стрелкой и сдвигом текста
+void drawMenuItem(float y, const char* str, int isSelected, float offsetX) {
     if (isSelected) {
         // Стрелка слева
         glColor3f(1.0f, 0.8f, 0.0f);
-        drawString(baseX - 0.08f, y, ">");
+        drawString(offsetX - 0.08f, y, ">");
 
         // Текст со смещением вправо
         glColor3f(1.0f, 1.0f, 1.0f);
-        drawString(baseX + 0.05f, y, str);
+        drawString(offsetX + 0.05f, y, str);
     }
     else {
         // Обычный пункт (без стрелки, без смещения)
         glColor3f(0.8f, 0.8f, 0.8f);
-        drawString(baseX, y, str);
+        drawString(offsetX, y, str);
     }
 }
 
@@ -81,15 +79,7 @@ void drawMenu() {
         const char* diffItems[] = { "Easy", "Medium", "Hard" };
         for (int i = 0; i < 3; i++) {
             float y = 0.35f - i * 0.12f;
-            if (i == selectedMenuItem) {
-                glColor3f(1.0f, 0.8f, 0.0f);
-                drawString(-0.35f, y, ">");
-                glColor3f(1.0f, 1.0f, 1.0f);
-            }
-            else {
-                glColor3f(0.8f, 0.8f, 0.8f);
-            }
-            drawString(-0.25f, y, diffItems[i]);
+            drawMenuItem(y, diffItems[i], (i == selectedMenuItem), -0.25f);
         }
         glColor3f(0.5f, 0.5f, 0.5f);
         drawCentered(-0.85f, "Select difficulty", 0.5f, 0.5f, 0.5f);
@@ -101,15 +91,7 @@ void drawMenu() {
         const char* modeItems[] = { "Player vs Player", "Player vs Bot" };
         for (int i = 0; i < 2; i++) {
             float y = 0.35f - i * 0.12f;
-            if (i == selectedMenuItem) {
-                glColor3f(1.0f, 0.8f, 0.0f);
-                drawString(-0.35f, y, ">");
-                glColor3f(1.0f, 1.0f, 1.0f);
-            }
-            else {
-                glColor3f(0.8f, 0.8f, 0.8f);
-            }
-            drawString(-0.25f, y, modeItems[i]);
+            drawMenuItem(y, modeItems[i], (i == selectedMenuItem), -0.25f);
         }
         glColor3f(0.5f, 0.5f, 0.5f);
         drawCentered(-0.85f, "Select game mode", 0.5f, 0.5f, 0.5f);
@@ -120,15 +102,7 @@ void drawMenu() {
     const char* items[] = { "New Game", "Records", "Help", "Exit" };
     for (int i = 0; i < 4; i++) {
         float y = 0.35f - i * 0.12f;
-        if (i == selectedMenuItem) {
-            glColor3f(1.0f, 0.8f, 0.0f);
-            drawString(-0.25f, y, ">");
-            glColor3f(1.0f, 1.0f, 1.0f);
-        }
-        else {
-            glColor3f(0.8f, 0.8f, 0.8f);
-        }
-        drawString(-0.15f, y, items[i]);
+        drawMenuItem(y, items[i], (i == selectedMenuItem), -0.15f);
     }
     glColor3f(0.5f, 0.5f, 0.5f);
     drawCentered(-0.85f, "Use arrows and Enter", 0.5f, 0.5f, 0.5f);
