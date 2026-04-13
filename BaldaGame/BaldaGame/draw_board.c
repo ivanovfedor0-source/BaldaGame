@@ -4,24 +4,84 @@
 #include "font.h"
 #include <GLFW/glfw3.h>
 #include <stdio.h>
+#include <windows.h>
 
 static float boardStartX = -0.55f;
 static float boardStartY = -0.55f;
 static float cellSize = 0.22f;
 
+// Маленький шрифт для списка слов
+static GLuint smallFontBase = 0;
+
+void initSmallFont() {
+    HDC hdc = wglGetCurrentDC();
+    smallFontBase = glGenLists(256);
+
+    HFONT hFont = CreateFontA(
+        -16, 0, 0, 0, FW_NORMAL,
+        FALSE, FALSE, FALSE,
+        RUSSIAN_CHARSET,
+        OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS,
+        DEFAULT_QUALITY,
+        DEFAULT_PITCH,
+        "Arial"
+    );
+
+    SelectObject(hdc, hFont);
+    wglUseFontBitmaps(hdc, 0, 255, smallFontBase);
+    DeleteObject(hFont);
+}
+
+void drawSmallRussianString(float x, float y, const char* str) {
+    if (!str || !str[0]) return;
+
+    glRasterPos2f(x, y);
+    glPushAttrib(GL_LIST_BIT);
+    glListBase(smallFontBase);
+    glCallLists(strlen(str), GL_UNSIGNED_BYTE, str);
+    glPopAttrib();
+}
+
+void drawPlayerWords(float x, float y, struct PlayerWords* pw, const char* title, float r, float g, float b) {
+    // Заголовок (обычный шрифт)
+    glColor3f(r, g, b);
+    drawRussianString(x, y, title);
+
+    float lineY = y - 0.06f;  // Увеличен отступ после заголовка
+
+    // Слова (маленький шрифт)
+    for (int i = 0; i < pw->count && i < 20; i++) {
+        char line[50];
+        sprintf(line, "%s (%d)", pw->words[i], pw->scores[i]);
+        glColor3f(0.85f, 0.85f, 0.85f);
+        drawSmallRussianString(x, lineY, line);
+        lineY -= 0.045f;  // Увеличен отступ между словами
+
+        if (lineY < -0.85f) break;
+    }
+
+    // Общий счёт
+    char total[50];
+    int totalScore = 0;
+    for (int i = 0; i < pw->count; i++) {
+        totalScore += pw->scores[i];
+    }
+    sprintf(total, "Total: %d", totalScore);
+    glColor3f(1.0f, 0.8f, 0.0f);
+    drawRussianString(x, lineY - 0.06f, total);
+}
+
 void drawGameBoard() {
-    // Рисуем сетку
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2.0f);
 
     glBegin(GL_LINES);
-    // Вертикальные линии
     for (int i = 0; i <= BOARD_SIZE; i++) {
         float x = boardStartX + i * cellSize;
         glVertex2f(x, boardStartY);
         glVertex2f(x, boardStartY + BOARD_SIZE * cellSize);
     }
-    // Горизонтальные линии
     for (int i = 0; i <= BOARD_SIZE; i++) {
         float y = boardStartY + i * cellSize;
         glVertex2f(boardStartX, y);
@@ -32,25 +92,23 @@ void drawGameBoard() {
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter != 0) {
-                // Центр клетки
                 float centerX = boardStartX + j * cellSize + cellSize / 2;
                 float centerY = boardStartY + i * cellSize + cellSize / 2;
-
                 float textOffset = 0.035f;
 
                 char letterStr[2] = { (char)board[i][j].letter, '\0' };
 
                 if (selectedRow == i && selectedCol == j) {
-                    glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтый (выбрана)
+                    glColor3f(1.0f, 1.0f, 0.0f);
                 }
                 else if (board[i][j].owner == 1) {
-                    glColor3f(0.3f, 0.8f, 0.3f);  // Зелёный (игрок 1)
+                    glColor3f(0.3f, 0.8f, 0.3f);
                 }
                 else if (board[i][j].owner == 2) {
-                    glColor3f(0.9f, 0.3f, 0.3f);  // Красный (игрок 2 / бот)
+                    glColor3f(0.9f, 0.3f, 0.3f);
                 }
                 else {
-                    glColor3f(1.0f, 1.0f, 1.0f);  // Белый
+                    glColor3f(1.0f, 1.0f, 1.0f);
                 }
 
                 drawRussianString(centerX - textOffset, centerY - textOffset, letterStr);
@@ -60,17 +118,17 @@ void drawGameBoard() {
 }
 
 void drawGameUI() {
-    char scoreText[100];
-
     if (gameMode == MODE_PVP) {
-        sprintf(scoreText, "Player 1: %d    Player 2: %d", playerScore, botScore);
+        // Списки дальше от поля
+        drawPlayerWords(-1.15f, 0.75f, &player1Words, "Player 1:", 0.3f, 0.8f, 0.3f);
+        drawPlayerWords(0.80f, 0.75f, &player2Words, "Player 2:", 0.9f, 0.5f, 0.3f);
     }
     else {
-        sprintf(scoreText, "%s: %d    Bot: %d", playerName, playerScore, botScore);
+        char title1[30];
+        sprintf(title1, "%s:", playerName);
+        drawPlayerWords(-1.15f, 0.75f, &player1Words, title1, 0.3f, 0.8f, 0.3f);
+        drawPlayerWords(0.80f, 0.75f, &player2Words, "Bot:", 0.9f, 0.3f, 0.3f);
     }
-
-    glColor3f(1.0f, 1.0f, 1.0f);
-    drawRussianString(-0.85f, 0.85f, scoreText);
 
     if (selectedRow != -1 && selectedCol != -1) {
         char hint[50];

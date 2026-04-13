@@ -69,30 +69,69 @@ void drawMenuItem(float y, const char* str, int isSelected) {
 }
 
 void drawMenu() {
+    // Заголовки — строго по центру
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.68f, "BALDA", 1.0f, 0.8f, 0.0f);
 
     glColor3f(0.7f, 0.7f, 0.7f);
     drawCentered(0.53f, "WORD GAME", 0.7f, 0.7f, 0.7f);
 
+    // Меню выбора сложности
+    if (selectingDifficulty) {
+        const char* diffItems[] = { "Easy", "Medium", "Hard" };
+        for (int i = 0; i < 3; i++) {
+            float y = 0.35f - i * 0.12f;
+            if (i == selectedMenuItem) {
+                glColor3f(1.0f, 0.8f, 0.0f);
+                drawString(-0.35f, y, ">");
+                glColor3f(1.0f, 1.0f, 1.0f);
+            }
+            else {
+                glColor3f(0.8f, 0.8f, 0.8f);
+            }
+            drawString(-0.25f, y, diffItems[i]);
+        }
+        glColor3f(0.5f, 0.5f, 0.5f);
+        drawCentered(-0.85f, "Select difficulty", 0.5f, 0.5f, 0.5f);
+        return;
+    }
+
+    // Меню выбора режима (PVP / PVE)
     if (selectingMode) {
         const char* modeItems[] = { "Player vs Player", "Player vs Bot" };
         for (int i = 0; i < 2; i++) {
-            float y = 0.28f - i * 0.12f;
-            drawMenuItem(y, modeItems[i], (i == selectedMenuItem));
+            float y = 0.35f - i * 0.12f;
+            if (i == selectedMenuItem) {
+                glColor3f(1.0f, 0.8f, 0.0f);
+                drawString(-0.35f, y, ">");
+                glColor3f(1.0f, 1.0f, 1.0f);
+            }
+            else {
+                glColor3f(0.8f, 0.8f, 0.8f);
+            }
+            drawString(-0.25f, y, modeItems[i]);
         }
         glColor3f(0.5f, 0.5f, 0.5f);
         drawCentered(-0.85f, "Select game mode", 0.5f, 0.5f, 0.5f);
+        return;
     }
-    else {
-        const char* items[] = { "New Game", "Records", "Help", "Exit" };
-        for (int i = 0; i < 4; i++) {
-            float y = 0.28f - i * 0.12f;
-            drawMenuItem(y, items[i], (i == selectedMenuItem));
+
+    // Главное меню
+    const char* items[] = { "New Game", "Records", "Help", "Exit" };
+    for (int i = 0; i < 4; i++) {
+        float y = 0.35f - i * 0.12f;
+        if (i == selectedMenuItem) {
+            glColor3f(1.0f, 0.8f, 0.0f);
+            drawString(-0.25f, y, ">");
+            glColor3f(1.0f, 1.0f, 1.0f);
         }
-        glColor3f(0.5f, 0.5f, 0.5f);
-        drawCentered(-0.85f, "Use arrows and Enter", 0.5f, 0.5f, 0.5f);
+        else {
+            glColor3f(0.8f, 0.8f, 0.8f);
+        }
+        drawString(-0.15f, y, items[i]);
     }
+    glColor3f(0.5f, 0.5f, 0.5f);
+    drawCentered(-0.85f, "Use arrows and Enter", 0.5f, 0.5f, 0.5f);
 }
 
 void drawHelp() {

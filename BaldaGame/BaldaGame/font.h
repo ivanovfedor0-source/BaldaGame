@@ -3,5 +3,6 @@
 
 void initRussianFont();
 void drawRussianString(float x, float y, const char* str);
+void initSmallFont();
 
 #endif

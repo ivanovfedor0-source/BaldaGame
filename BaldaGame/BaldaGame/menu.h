@@ -13,15 +13,22 @@ enum GameMode {
     MODE_PVE = 1
 };
 
+enum BotDifficulty {
+    DIFFICULTY_EASY = 0,
+    DIFFICULTY_MEDIUM = 1,
+    DIFFICULTY_HARD = 2
+};
+
 extern enum GameState gameState;
 extern enum GameMode gameMode;
+extern enum BotDifficulty botDifficulty;
 extern int selectedMenuItem;
 extern int selectingMode;
+extern int selectingDifficulty;
 
 void initMenu();
 void menuUp();
 void menuDown();
 void menuSelect();
-void updateMenu();
 
 #endif

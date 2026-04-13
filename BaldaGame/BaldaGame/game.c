@@ -6,6 +6,8 @@
 #include <ctype.h>
 #include <GLFW/glfw3.h>
 
+#define MAX_QUEUE 5000
+
 struct Cell board[BOARD_SIZE][BOARD_SIZE];
 int currentPlayer = 1;
 int playerScore = 0;
@@ -19,8 +21,19 @@ int askingName = 0;
 char nameInput[20] = "";
 int nameInputLen = 0;
 
+struct PlayerWords player1Words = { .count = 0 };
+struct PlayerWords player2Words = { .count = 0 };
+
 static char usedWords[1000][30];
 static int usedWordsCount = 0;
+
+typedef struct {
+    int row;
+    int col;
+    char word[30];
+    int len;
+    int visited[BOARD_SIZE][BOARD_SIZE];
+} BFSState;
 
 static const unsigned char rusKeyMap[] = {
     /* A */ 0xD4,  // Ф
@@ -100,6 +113,26 @@ void addPoints(int points, int player) {
     }
 }
 
+void addWordToPlayer(int player, const char* word, int points) {
+    struct PlayerWords* pw;
+    if (player == 1) {
+        pw = &player1Words;
+    }
+    else {
+        pw = &player2Words;
+    }
+
+    if (pw->count < MAX_PLAYER_WORDS) {
+        strcpy(pw->words[pw->count], word);
+        pw->scores[pw->count] = points;
+        pw->count++;
+    }
+}
+
+void clearPlayerWords() {
+    player1Words.count = 0;
+    player2Words.count = 0;
+}
 
 void reverseString(char* str) {
     int len = strlen(str);
@@ -110,28 +143,34 @@ void reverseString(char* str) {
     }
 }
 
-// Структура для BFS
-typedef struct {
-    int row;
-    int col;
-    char word[30];
-    int len;
-    int visited[BOARD_SIZE][BOARD_SIZE];
-} BFSState;
+int checkAndAddWordDirect(int row, int col, int player) {
+    int totalPoints = 0;
+    int bestPoints = 0;
+    char bestWord[30] = "";
 
-#define MAX_QUEUE 5000
+    printf("\n=== Checking words at (%d,%d) ===\n", row, col);
 
-void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoints) {
+    printf("Current board:\n");
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (board[i][j].letter == 0) printf(" . ");
+            else printf(" %c ", board[i][j].letter);
+        }
+        printf("\n");
+    }
+
+    printf("\n--- Found candidates ---\n");
+
     BFSState queue[MAX_QUEUE];
     int front = 0, rear = 0;
 
-    queue[rear].row = startRow;
-    queue[rear].col = startCol;
-    queue[rear].word[0] = board[startRow][startCol].letter;
+    queue[rear].row = row;
+    queue[rear].col = col;
+    queue[rear].word[0] = board[row][col].letter;
     queue[rear].word[1] = '\0';
     queue[rear].len = 1;
     memset(queue[rear].visited, 0, sizeof(queue[rear].visited));
-    queue[rear].visited[startRow][startCol] = 1;
+    queue[rear].visited[row][col] = 1;
     rear++;
 
     while (front < rear) {
@@ -143,20 +182,22 @@ void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoin
             strcpy(wordCopy, current.word);
 
             if (isWordInDictionary(wordCopy) && !isWordUsed(wordCopy)) {
-                addPoints(current.len, player);
-                addUsedWord(wordCopy);
-                *totalPoints += current.len;
-                printf(">>> BFS FOUND: '%s' +%d points\n", wordCopy, current.len);
+                printf("  Candidate: '%s' (len=%d)\n", wordCopy, current.len);
+                if (current.len > bestPoints) {
+                    bestPoints = current.len;
+                    strcpy(bestWord, wordCopy);
+                }
             }
             else {
                 char reversed[30];
                 strcpy(reversed, wordCopy);
                 reverseString(reversed);
                 if (isWordInDictionary(reversed) && !isWordUsed(reversed)) {
-                    addPoints(current.len, player);
-                    addUsedWord(reversed);
-                    *totalPoints += current.len;
-                    printf(">>> BFS FOUND (reversed): '%s' -> '%s' +%d points\n", wordCopy, reversed, current.len);
+                    printf("  Candidate (reversed): '%s' -> '%s' (len=%d)\n", wordCopy, reversed, current.len);
+                    if (current.len > bestPoints) {
+                        bestPoints = current.len;
+                        strcpy(bestWord, reversed);
+                    }
                 }
             }
         }
@@ -187,32 +228,63 @@ void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoin
             }
         }
     }
-}
 
-int checkAndAddWordDirect(int row, int col, int player) {
-    int totalPoints = 0;
+    printf("--- End of candidates ---\n");
 
-    printf("\n=== Checking words at (%d,%d) ===\n", row, col);
-
-    printf("Current board:\n");
-    for (int i = 0; i < BOARD_SIZE; i++) {
-        for (int j = 0; j < BOARD_SIZE; j++) {
-            if (board[i][j].letter == 0) printf(" . ");
-            else printf(" %c ", board[i][j].letter);
-        }
-        printf("\n");
-    }
-
-    findAllWordsFromCell(row, col, player, &totalPoints);
-
-    if (totalPoints == 0) {
-        printf(">>> No valid words found!\n");
+    if (bestPoints > 0) {
+        addPoints(bestPoints, player);
+        addUsedWord(bestWord);
+        addWordToPlayer(player, bestWord, bestPoints);
+        totalPoints = bestPoints;
+        printf(">>> BEST WORD: '%s' +%d points\n", bestWord, bestPoints);
     }
     else {
-        printf(">>> Total +%d points!\n", totalPoints);
+        printf(">>> No valid words found!\n");
     }
 
+    printf(">>> Total +%d points!\n", totalPoints);
     return totalPoints;
+}
+
+
+// Функции доступа к списку использованных слов
+int isWordUsedGlobal(const char* word) {
+    for (int i = 0; i < usedWordsCount; i++) {
+        if (strcmp(usedWords[i], word) == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+void addUsedWordGlobal(const char* word) {
+    if (usedWordsCount < 1000) {
+        strcpy(usedWords[usedWordsCount], word);
+        usedWordsCount++;
+    }
+}
+
+int getUsedWordsCount(void) {
+    return usedWordsCount;
+}
+
+void clearUsedWords(void) {
+    usedWordsCount = 0;
+}
+
+
+void copyUsedWords(char dest[1000][30], int* destCount) {
+    *destCount = usedWordsCount;
+    for (int i = 0; i < usedWordsCount; i++) {
+        strcpy(dest[i], usedWords[i]);
+    }
+}
+
+void restoreUsedWords(char src[1000][30], int srcCount) {
+    usedWordsCount = srcCount;
+    for (int i = 0; i < srcCount; i++) {
+        strcpy(usedWords[i], src[i]);
+    }
 }
 
 void initGame() {
@@ -238,6 +310,7 @@ void initGame() {
     selectedCol = -1;
     currentInputLetter = '\0';
     usedWordsCount = 0;
+    clearPlayerWords();
 }
 
 int isCellEmpty(int row, int col) {

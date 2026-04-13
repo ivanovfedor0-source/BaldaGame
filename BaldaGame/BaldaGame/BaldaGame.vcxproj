@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bot.c" />
     <ClCompile Include="dictionary.c" />
     <ClCompile Include="draw_board.c" />
     <ClCompile Include="font.c" />
@@ -148,6 +149,7 @@
     <ClCompile Include="menu.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bot.h" />
     <ClInclude Include="dictionary.h" />
     <ClInclude Include="draw_board.h" />
     <ClInclude Include="font.h" />

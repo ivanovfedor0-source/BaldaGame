@@ -36,6 +36,9 @@
     <ClCompile Include="dictionary.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="bot.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="menu.h">
@@ -54,6 +57,9 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="dictionary.h">
+      <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="bot.h">
       <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
