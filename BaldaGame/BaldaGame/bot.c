@@ -24,7 +24,7 @@ static const unsigned char allRussianLetters[] = {
     0xA8  // Ё
 };
 
-// Самые частые буквы в русском языке (для ускорения оценки)
+// Самые частые буквы в русском языке (для оптимизации)
 static const unsigned char frequentLetters[] = {
     0xC0,  // А
     0xC5,  // Е
@@ -127,6 +127,39 @@ void clearCache() {
     cacheSize = 0;
 }
 
+// Поставить случайную букву в случайную пустую клетку
+void placeRandomLetter() {
+    int emptyCells[25][2];
+    int emptyCount = 0;
+
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
+                emptyCells[emptyCount][0] = i;
+                emptyCells[emptyCount][1] = j;
+                emptyCount++;
+            }
+        }
+    }
+
+    if (emptyCount > 0) {
+        srand((unsigned int)time(NULL));
+        int cellIdx = rand() % emptyCount;
+        int letterIdx = rand() % RUSSIAN_LETTERS_COUNT;
+        int row = emptyCells[cellIdx][0];
+        int col = emptyCells[cellIdx][1];
+        unsigned char letter = allRussianLetters[letterIdx];
+
+        printf("Bot places random letter '%c' at (%d,%d) (no winning moves)\n",
+            letter, row + 1, col + 1);
+        placeRussianLetter(row, col, letter);
+        checkAndAddWordDirect(row, col, 2);
+    }
+    else {
+        printf("Bot has no valid moves at all!\n");
+    }
+}
+
 // Оценка хода (сколько очков принесёт буква на клетке)
 int evaluateMove(int row, int col, unsigned char letter, int player, char* bestWord) {
     int cached = getCachedPoints(row, col, letter, player, bestWord);
@@ -225,7 +258,7 @@ int evaluateMove(int row, int col, unsigned char letter, int player, char* bestW
     return bestPoints;
 }
 
-// Поиск всех возможных ходов (с выбором букв)
+// Поиск всех возможных выигрышных ходов
 int findAllMoves(BotMove* moves, int maxMoves, int useAllLetters) {
     int moveCount = 0;
     const unsigned char* letters = useAllLetters ? allRussianLetters : frequentLetters;
@@ -255,135 +288,28 @@ int findAllMoves(BotMove* moves, int maxMoves, int useAllLetters) {
     return moveCount;
 }
 
-// Easy бот: слабый, избегает сильных ходов
+// Easy бот: 70% случайная буква, 30% выигрышный ход
 void botMakeMoveEasy() {
-    BotMove allMoves[500];
-    int moveCount = 0;
+    BotMove winningMoves[500];
+    int winCount = findAllMoves(winningMoves, 500, 1);
 
-    // Собираем ВСЕ возможные выигрышные ходы
-    for (int i = 0; i < BOARD_SIZE; i++) {
-        for (int j = 0; j < BOARD_SIZE; j++) {
-            if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
-                for (int k = 0; k < RUSSIAN_LETTERS_COUNT; k++) {
-                    unsigned char letter = allRussianLetters[k];
-                    char bestWord[30] = "";
-                    int points = evaluateMove(i, j, letter, 2, bestWord);
+    srand((unsigned int)time(NULL));
+    int r = rand() % 100;
 
-                    if (points >= 3) {
-                        allMoves[moveCount].row = i;
-                        allMoves[moveCount].col = j;
-                        allMoves[moveCount].letter = letter;
-                        allMoves[moveCount].points = points;
-                        strcpy(allMoves[moveCount].word, bestWord);
-                        moveCount++;
-                    }
-                }
-            }
-        }
-    }
-
-    if (moveCount > 0) {
-        // Сортируем ходы по очкам (по возрастанию)
-        for (int i = 0; i < moveCount - 1; i++) {
-            for (int j = i + 1; j < moveCount; j++) {
-                if (allMoves[i].points > allMoves[j].points) {
-                    BotMove temp = allMoves[i];
-                    allMoves[i] = allMoves[j];
-                    allMoves[j] = temp;
-                }
-            }
-        }
-
-        // Проверяем, все ли ходы дают одинаковое количество очков
-        int firstPoints = allMoves[0].points;
-        int lastPoints = allMoves[moveCount - 1].points;
-        int allSame = (firstPoints == lastPoints);
-
-        if (allSame) {
-            // Все ходы одинаковые - не ставим выигрышный ход, ставим случайную букву (0 очков)
-            printf("Bot (Easy): all moves give %d points, skipping winning move\n", firstPoints);
-
-            // Ищем пустую клетку для случайной буквы
-            int emptyCells[25][2];
-            int emptyCount = 0;
-
-            for (int i = 0; i < BOARD_SIZE; i++) {
-                for (int j = 0; j < BOARD_SIZE; j++) {
-                    if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
-                        emptyCells[emptyCount][0] = i;
-                        emptyCells[emptyCount][1] = j;
-                        emptyCount++;
-                    }
-                }
-            }
-
-            if (emptyCount > 0) {
-                srand((unsigned int)time(NULL));
-                int cellIdx = rand() % emptyCount;
-                int letterIdx = rand() % RUSSIAN_LETTERS_COUNT;
-                int row = emptyCells[cellIdx][0];
-                int col = emptyCells[cellIdx][1];
-                unsigned char letter = allRussianLetters[letterIdx];
-
-                printf("Bot (Easy) places random letter '%c' at (%d,%d) (0 points)\n",
-                    letter, row + 1, col + 1);
-                placeRussianLetter(row, col, letter);
-                checkAndAddWordDirect(row, col, 2);
-            }
-            else {
-                printf("Bot has no valid moves!\n");
-            }
-        }
-        else {
-            // Есть разные очки - выбираем НЕ максимальный, а средний
-            // Берём ход из середины (например, если 3,4,5,6 -> берём 4)
-            int targetIdx = moveCount / 3;  // Берём ход из первой трети (не лучший)
-            if (targetIdx >= moveCount) targetIdx = moveCount - 2;
-            if (targetIdx < 0) targetIdx = 0;
-
-            BotMove m = allMoves[targetIdx];
-
-            printf("Bot (Easy) places '%c' at (%d,%d) for %d points (word: %s) [not best]\n",
-                m.letter, m.row + 1, m.col + 1, m.points, m.word);
-            placeRussianLetter(m.row, m.col, m.letter);
-            checkAndAddWordDirect(m.row, m.col, 2);
-        }
+    if (winCount > 0 && r < 30) {
+        int idx = rand() % winCount;
+        BotMove m = winningMoves[idx];
+        printf("Bot (Easy) places '%c' at (%d,%d) for %d points (word: %s)\n",
+            m.letter, m.row + 1, m.col + 1, m.points, m.word);
+        placeRussianLetter(m.row, m.col, m.letter);
+        checkAndAddWordDirect(m.row, m.col, 2);
     }
     else {
-        // Нет выигрышных ходов - ставим случайную букву (0 очков)
-        int emptyCells[25][2];
-        int emptyCount = 0;
-
-        for (int i = 0; i < BOARD_SIZE; i++) {
-            for (int j = 0; j < BOARD_SIZE; j++) {
-                if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
-                    emptyCells[emptyCount][0] = i;
-                    emptyCells[emptyCount][1] = j;
-                    emptyCount++;
-                }
-            }
-        }
-
-        if (emptyCount > 0) {
-            srand((unsigned int)time(NULL));
-            int cellIdx = rand() % emptyCount;
-            int letterIdx = rand() % RUSSIAN_LETTERS_COUNT;
-            int row = emptyCells[cellIdx][0];
-            int col = emptyCells[cellIdx][1];
-            unsigned char letter = allRussianLetters[letterIdx];
-
-            printf("Bot (Easy) places random letter '%c' at (%d,%d) (no winning moves)\n",
-                letter, row + 1, col + 1);
-            placeRussianLetter(row, col, letter);
-            checkAndAddWordDirect(row, col, 2);
-        }
-        else {
-            printf("Bot has no valid moves!\n");
-        }
+        placeRandomLetter();
     }
 }
 
-// Medium бот: жадный, использует все буквы
+// Medium бот: жадный, выбирает ход с максимальными очками
 void botMakeMoveMedium() {
     BotMove bestMove;
     bestMove.points = -1;
@@ -421,29 +347,22 @@ void botMakeMoveMedium() {
         placeRussianLetter(bestMove.row, bestMove.col, bestMove.letter);
         checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
     }
-    else if (bestMove.row != -1) {
-        printf("Bot (Medium) places random letter at (%d,%d) (no winning moves)\n",
-            bestMove.row + 1, bestMove.col + 1);
-        placeRussianLetter(bestMove.row, bestMove.col, bestMove.letter);
-        checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
-    }
     else {
-        printf("Bot has no valid moves!\n");
+        placeRandomLetter();
     }
 }
 
-// Hard бот: минимакс, использует все буквы (но с оптимизацией)
+// Hard бот: минимакс (учитывает лучший ответ игрока)
 void botMakeMoveHard() {
     BotMove bestMove;
     bestMove.points = -999999;
     bestMove.row = -1;
 
-    // Собираем возможные ходы бота (все буквы)
     BotMove botMoves[500];
     int botMoveCount = findAllMoves(botMoves, 500, 1);
 
     if (botMoveCount == 0) {
-        printf("Bot has no valid moves!\n");
+        placeRandomLetter();
         return;
     }
 
@@ -477,7 +396,6 @@ void botMakeMoveHard() {
         int bestPlayerResponse = 0;
         int checked = 0;
 
-        // Проверяем ответы игрока (только частые буквы для скорости)
         for (int i = 0; i < BOARD_SIZE && checked < 50; i++) {
             for (int j = 0; j < BOARD_SIZE && checked < 50; j++) {
                 if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
