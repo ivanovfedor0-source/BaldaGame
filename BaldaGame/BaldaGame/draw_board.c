@@ -29,7 +29,6 @@ void drawGameBoard() {
     }
     glEnd();
 
-    // Рисуем буквы
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter != 0) {
@@ -37,12 +36,10 @@ void drawGameBoard() {
                 float centerX = boardStartX + j * cellSize + cellSize / 2;
                 float centerY = boardStartY + i * cellSize + cellSize / 2;
 
-                // Смещение для центрирования текста
                 float textOffset = 0.035f;
 
                 char letterStr[2] = { (char)board[i][j].letter, '\0' };
 
-                // Цвета
                 if (selectedRow == i && selectedCol == j) {
                     glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтый (выбрана)
                 }
@@ -69,7 +66,6 @@ void drawGameUI() {
         sprintf(scoreText, "Player 1: %d    Player 2: %d", playerScore, botScore);
     }
     else {
-        // PVE: отображаем имя игрока
         sprintf(scoreText, "%s: %d    Bot: %d", playerName, playerScore, botScore);
     }
 

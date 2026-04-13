@@ -50,7 +50,7 @@ void drawCentered(float y, const char* str, float r, float g, float b) {
 
 // Пункт меню: при выделении стрелка слева, текст сдвигается вправо
 void drawMenuItem(float y, const char* str, int isSelected) {
-    float baseX = -0.25f;  // Базовая позиция для всех пунктов
+    float baseX = -0.25f;
 
     if (isSelected) {
         // Стрелка слева
@@ -69,7 +69,6 @@ void drawMenuItem(float y, const char* str, int isSelected) {
 }
 
 void drawMenu() {
-    // Заголовки — строго по центру
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.68f, "BALDA", 1.0f, 0.8f, 0.0f);
 

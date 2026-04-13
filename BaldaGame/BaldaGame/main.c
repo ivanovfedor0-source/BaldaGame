@@ -18,11 +18,9 @@ void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
 
-    // Нормализация координат мыши в диапазон [0,1]
     float nx = (float)xpos / width;
     float ny = 1.0f - (float)ypos / height;
 
-    // Преобразование в координаты OpenGL с учётом пропорций
     int fbWidth, fbHeight;
     glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
     float aspect = (float)fbWidth / (float)fbHeight;
@@ -59,7 +57,7 @@ void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
     }
 }
 
-// Обработка клика мыши
+
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
@@ -76,10 +74,10 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     }
 }
 
-// Обработка клавиш
+
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
-        // Глобальные клавиши F1-F4
+
         switch (key) {
         case GLFW_KEY_F1:
             gameState = STATE_MENU;
@@ -95,7 +93,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // Ввод имени
+
         if (gameState == STATE_GAME && askingName) {
             if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
                 if (nameInputLen < 15) {
@@ -138,7 +136,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 unsigned char rusLetter = getRussianLetter(key);
                 if (rusLetter != 0) {
                     if (gameMode == MODE_PVP || (gameMode == MODE_PVE && currentPlayer == 1)) {
-                        // ОТЛАДКА: выводим информацию о вставляемой букве
                         printf("\n========================================\n");
                         printf("PLAYER %d puts letter at (%d, %d)\n", currentPlayer, selectedRow + 1, selectedCol + 1);
                         printf("Letter code: 0x%02X ('%c')\n", rusLetter, rusLetter);
@@ -146,7 +143,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
                         placeRussianLetter(selectedRow, selectedCol, rusLetter);
 
-                        // Сохраняем координаты до очистки
                         int row = selectedRow;
                         int col = selectedCol;
 
@@ -156,14 +152,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
 
                         printf("DEBUG: Calling checkAndAddWordDirect with (%d,%d)\n", row, col);
 
-                        // Проверяем слова
                         int points = checkAndAddWordDirect(row, col, currentPlayer);
 
                         if (points == 0) {
                             printf(">>> No valid words found!\n");
                         }
 
-                        // Смена хода
                         if (gameMode == MODE_PVP) {
                             currentPlayer = (currentPlayer == 1) ? 2 : 1;
                             printf("Now Player %d turn\n", currentPlayer);
@@ -237,10 +231,10 @@ int main() {
     initFont();          // Для английского меню
     initRussianFont();   // Для русских букв в игре
 
-    // Загрузка словаря
+
     loadDictionary("C:/BaldaCoursework/data/dictionary.txt");
 
-    // Инициализация состояния
+
     initMenu();
     initGame();
 
@@ -253,7 +247,7 @@ int main() {
         glfwPollEvents();
     }
 
-    // Освобождение памяти словаря
+
     freeDictionary();
 
     glfwDestroyWindow(window);

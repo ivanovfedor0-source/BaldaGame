@@ -100,7 +100,7 @@ void addPoints(int points, int player) {
     }
 }
 
-// Переворот строки
+
 void reverseString(char* str) {
     int len = strlen(str);
     for (int i = 0; i < len / 2; i++) {
@@ -138,7 +138,6 @@ void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoin
         BFSState current = queue[front];
         front++;
 
-        // Проверяем только слова длиной 3-8 букв
         if (current.len >= 3 && current.len <= 8) {
             char wordCopy[30];
             strcpy(wordCopy, current.word);
@@ -162,7 +161,6 @@ void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoin
             }
         }
 
-        // Ограничиваем глубину поиска 8 буквами
         if (current.len >= 8) continue;
 
         int dr[] = { -1, 1, 0, 0 };
@@ -191,13 +189,11 @@ void findAllWordsFromCell(int startRow, int startCol, int player, int* totalPoin
     }
 }
 
-// Основная функция проверки слов
 int checkAndAddWordDirect(int row, int col, int player) {
     int totalPoints = 0;
 
     printf("\n=== Checking words at (%d,%d) ===\n", row, col);
 
-    // Выводим текущее состояние поля
     printf("Current board:\n");
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
@@ -207,7 +203,6 @@ int checkAndAddWordDirect(int row, int col, int player) {
         printf("\n");
     }
 
-    // BFS поиск всех слов от новой буквы
     findAllWordsFromCell(row, col, player, &totalPoints);
 
     if (totalPoints == 0) {
@@ -229,7 +224,6 @@ void initGame() {
         }
     }
 
-    // Слово "БАЛДА" по центру
     unsigned char startWord[] = { 0xC1, 0xC0, 0xCB, 0xC4, 0xC0 };
     for (int j = 0; j < 5; j++) {
         board[2][j].letter = startWord[j];
