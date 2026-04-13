@@ -76,6 +76,7 @@ void drawGameBoard() {
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2.0f);
 
+    // Рисуем сетку
     glBegin(GL_LINES);
     for (int i = 0; i <= BOARD_SIZE; i++) {
         float x = boardStartX + i * cellSize;
@@ -89,6 +90,7 @@ void drawGameBoard() {
     }
     glEnd();
 
+    // Рисуем буквы
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter != 0) {
@@ -99,21 +101,37 @@ void drawGameBoard() {
                 char letterStr[2] = { (char)board[i][j].letter, '\0' };
 
                 if (selectedRow == i && selectedCol == j) {
-                    glColor3f(1.0f, 1.0f, 0.0f);
+                    glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтая буква
                 }
                 else if (board[i][j].owner == 1) {
-                    glColor3f(0.3f, 0.8f, 0.3f);
+                    glColor3f(0.3f, 0.8f, 0.3f);  // Зелёный (игрок 1)
                 }
                 else if (board[i][j].owner == 2) {
-                    glColor3f(0.9f, 0.3f, 0.3f);
+                    glColor3f(0.9f, 0.3f, 0.3f);  // Красный (игрок 2 / бот)
                 }
                 else {
-                    glColor3f(1.0f, 1.0f, 1.0f);
+                    glColor3f(1.0f, 1.0f, 1.0f);  // Белый
                 }
 
                 drawRussianString(centerX - textOffset, centerY - textOffset, letterStr);
             }
         }
+    }
+
+    // Рисуем рамку вокруг выбранной клетки (ПОВЕРХ буквы)
+    if (selectedRow != -1 && selectedCol != -1) {
+        float x = boardStartX + selectedCol * cellSize;
+        float y = boardStartY + selectedRow * cellSize;
+
+        glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтая рамка
+        glLineWidth(3.0f);
+        glBegin(GL_LINE_LOOP);
+        glVertex2f(x + 0.02f, y + 0.02f);
+        glVertex2f(x + cellSize - 0.02f, y + 0.02f);
+        glVertex2f(x + cellSize - 0.02f, y + cellSize - 0.02f);
+        glVertex2f(x + 0.02f, y + cellSize - 0.02f);
+        glEnd();
+        glLineWidth(1.0f);
     }
 }
 

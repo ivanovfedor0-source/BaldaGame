@@ -314,7 +314,10 @@ void botMakeMoveMedium() {
     BotMove bestMove;
     bestMove.points = -1;
     bestMove.row = -1;
+    bestMove.col = -1;
+    bestMove.letter = 0;
 
+    // Перебираем только клетки, рядом с которыми есть буквы
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
@@ -329,26 +332,27 @@ void botMakeMoveMedium() {
                         bestMove.col = j;
                         bestMove.letter = letter;
                         strcpy(bestMove.word, bestWord);
-
-                        if (bestMove.points >= 8) {
-                            i = BOARD_SIZE;
-                            j = BOARD_SIZE;
-                            break;
-                        }
                     }
                 }
             }
         }
     }
 
-    if (bestMove.points > 0) {
-        printf("Bot (Medium) places '%c' at (%d,%d) for %d points (word: %s)\n",
-            bestMove.letter, bestMove.row + 1, bestMove.col + 1, bestMove.points, bestMove.word);
+    if (bestMove.row != -1) {
+        if (bestMove.points > 0) {
+            printf("Bot (Medium) places '%c' at (%d,%d) for %d points (word: %s)\n",
+                bestMove.letter, bestMove.row + 1, bestMove.col + 1, bestMove.points, bestMove.word);
+        }
+        else {
+            printf("Bot (Medium) places '%c' at (%d,%d) (no winning moves)\n",
+                bestMove.letter, bestMove.row + 1, bestMove.col + 1);
+        }
         placeRussianLetter(bestMove.row, bestMove.col, bestMove.letter);
         checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
     }
     else {
-        placeRandomLetter();
+        // Нет клеток рядом с буквами — поле заполнено или только изолированные клетки
+        printf("Bot has no valid moves!\n");
     }
 }
 
