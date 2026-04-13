@@ -296,6 +296,7 @@ void initGame() {
         }
     }
 
+    // Слово "БАЛДА" по центру
     unsigned char startWord[] = { 0xC1, 0xC0, 0xCB, 0xC4, 0xC0 };
     for (int j = 0; j < 5; j++) {
         board[2][j].letter = startWord[j];
@@ -311,6 +312,9 @@ void initGame() {
     currentInputLetter = '\0';
     usedWordsCount = 0;
     clearPlayerWords();
+
+    addUsedWord("БАЛДА");
+    printf("Added starting word 'БАЛДА' to used words list\n");
 }
 
 int isCellEmpty(int row, int col) {

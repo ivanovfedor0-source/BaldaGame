@@ -326,7 +326,8 @@ void botMakeMoveMedium() {
                     char bestWord[30] = "";
                     int points = evaluateMove(i, j, letter, 2, bestWord);
 
-                    if (points > bestMove.points) {
+                    // Игнорируем ходы с 0 очков
+                    if (points > 0 && points > bestMove.points) {
                         bestMove.points = points;
                         bestMove.row = i;
                         bestMove.col = j;
@@ -339,20 +340,41 @@ void botMakeMoveMedium() {
     }
 
     if (bestMove.row != -1) {
-        if (bestMove.points > 0) {
-            printf("Bot (Medium) places '%c' at (%d,%d) for %d points (word: %s)\n",
-                bestMove.letter, bestMove.row + 1, bestMove.col + 1, bestMove.points, bestMove.word);
-        }
-        else {
-            printf("Bot (Medium) places '%c' at (%d,%d) (no winning moves)\n",
-                bestMove.letter, bestMove.row + 1, bestMove.col + 1);
-        }
+        printf("Bot (Medium) places '%c' at (%d,%d) for %d points (word: %s)\n",
+            bestMove.letter, bestMove.row + 1, bestMove.col + 1, bestMove.points, bestMove.word);
         placeRussianLetter(bestMove.row, bestMove.col, bestMove.letter);
         checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
     }
     else {
-        // Нет клеток рядом с буквами — поле заполнено или только изолированные клетки
-        printf("Bot has no valid moves!\n");
+        // Нет выигрышных ходов — ставим случайную букву в лучшую доступную клетку
+        // (перебираем все клетки, даже с 0 очков)
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            for (int j = 0; j < BOARD_SIZE; j++) {
+                if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
+                    for (int k = 0; k < RUSSIAN_LETTERS_COUNT; k++) {
+                        unsigned char letter = allRussianLetters[k];
+                        int points = evaluateMove(i, j, letter, 2, NULL);
+
+                        if (points > bestMove.points) {
+                            bestMove.points = points;
+                            bestMove.row = i;
+                            bestMove.col = j;
+                            bestMove.letter = letter;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (bestMove.row != -1) {
+            printf("Bot (Medium) places '%c' at (%d,%d) (no winning moves, %d points)\n",
+                bestMove.letter, bestMove.row + 1, bestMove.col + 1, bestMove.points);
+            placeRussianLetter(bestMove.row, bestMove.col, bestMove.letter);
+            checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
+        }
+        else {
+            printf("Bot has no valid moves!\n");
+        }
     }
 }
 
