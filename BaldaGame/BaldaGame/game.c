@@ -247,7 +247,6 @@ int checkAndAddWordDirect(int row, int col, int player) {
 }
 
 
-// Функции доступа к списку использованных слов
 int isWordUsedGlobal(const char* word) {
     for (int i = 0; i < usedWordsCount; i++) {
         if (strcmp(usedWords[i], word) == 0) {
@@ -296,7 +295,6 @@ void initGame() {
         }
     }
 
-    // Слово "БАЛДА" по центру
     unsigned char startWord[] = { 0xC1, 0xC0, 0xCB, 0xC4, 0xC0 };
     for (int j = 0; j < 5; j++) {
         board[2][j].letter = startWord[j];

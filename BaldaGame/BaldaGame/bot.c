@@ -8,7 +8,6 @@
 #include <string.h>
 #include <time.h>
 
-// Структура для хранения информации о возможном ходе
 typedef struct {
     int row;
     int col;
@@ -17,14 +16,12 @@ typedef struct {
     char word[30];
 } BotMove;
 
-// Коды всех русских заглавных букв (33 буквы)
 static const unsigned char allRussianLetters[] = {
     0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF,
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
-    0xA8  // Ё
+    0xA8 
 };
 
-// Самые частые буквы в русском языке (для оптимизации)
 static const unsigned char frequentLetters[] = {
     0xC0,  // А
     0xC5,  // Е
@@ -43,7 +40,6 @@ static const unsigned char frequentLetters[] = {
 #define MAX_QUEUE_EVAL 5000
 #define MAX_CACHE_SIZE 2000
 
-// Структура для кэша результатов evaluateMove
 typedef struct {
     int row;
     int col;
@@ -57,7 +53,6 @@ typedef struct {
 static CachedMove moveCache[MAX_CACHE_SIZE];
 static int cacheSize = 0;
 
-// Вспомогательная структура для BFS
 typedef struct {
     int row;
     int col;
@@ -66,7 +61,6 @@ typedef struct {
     int visited[BOARD_SIZE][BOARD_SIZE];
 } BFSStateEval;
 
-// Проверка, есть ли рядом с клеткой хотя бы одна буква
 int hasAdjacentLetter(int row, int col) {
     int dr[] = { -1, 1, 0, 0 };
     int dc[] = { 0, 0, -1, 1 };
@@ -84,7 +78,6 @@ int hasAdjacentLetter(int row, int col) {
     return 0;
 }
 
-// Переворот строки
 void reverseStringLocal(char* str) {
     int len = strlen(str);
     for (int i = 0; i < len / 2; i++) {
@@ -94,7 +87,6 @@ void reverseStringLocal(char* str) {
     }
 }
 
-// Получение результата из кэша
 int getCachedPoints(int row, int col, unsigned char letter, int player, char* word) {
     for (int i = 0; i < cacheSize; i++) {
         if (moveCache[i].row == row && moveCache[i].col == col &&
@@ -108,7 +100,6 @@ int getCachedPoints(int row, int col, unsigned char letter, int player, char* wo
     return -1;
 }
 
-// Добавление результата в кэш
 void addToCache(int row, int col, unsigned char letter, int player, int points, const char* word) {
     if (cacheSize < MAX_CACHE_SIZE) {
         moveCache[cacheSize].row = row;
@@ -122,12 +113,10 @@ void addToCache(int row, int col, unsigned char letter, int player, int points, 
     }
 }
 
-// Очистка кэша
 void clearCache() {
     cacheSize = 0;
 }
 
-// Поставить случайную букву в случайную пустую клетку
 void placeRandomLetter() {
     int emptyCells[25][2];
     int emptyCount = 0;
@@ -160,7 +149,6 @@ void placeRandomLetter() {
     }
 }
 
-// Оценка хода (сколько очков принесёт буква на клетке)
 int evaluateMove(int row, int col, unsigned char letter, int player, char* bestWord) {
     int cached = getCachedPoints(row, col, letter, player, bestWord);
     if (cached >= 0) {
@@ -258,7 +246,6 @@ int evaluateMove(int row, int col, unsigned char letter, int player, char* bestW
     return bestPoints;
 }
 
-// Поиск всех возможных выигрышных ходов
 int findAllMoves(BotMove* moves, int maxMoves, int useAllLetters) {
     int moveCount = 0;
     const unsigned char* letters = useAllLetters ? allRussianLetters : frequentLetters;
@@ -288,7 +275,6 @@ int findAllMoves(BotMove* moves, int maxMoves, int useAllLetters) {
     return moveCount;
 }
 
-// Easy бот: 70% случайная буква, 30% выигрышный ход
 void botMakeMoveEasy() {
     BotMove winningMoves[500];
     int winCount = findAllMoves(winningMoves, 500, 1);
@@ -309,7 +295,6 @@ void botMakeMoveEasy() {
     }
 }
 
-// Medium бот: жадный, выбирает ход с максимальными очками
 void botMakeMoveMedium() {
     BotMove bestMove;
     bestMove.points = -1;
@@ -317,7 +302,6 @@ void botMakeMoveMedium() {
     bestMove.col = -1;
     bestMove.letter = 0;
 
-    // Перебираем только клетки, рядом с которыми есть буквы
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
@@ -326,7 +310,6 @@ void botMakeMoveMedium() {
                     char bestWord[30] = "";
                     int points = evaluateMove(i, j, letter, 2, bestWord);
 
-                    // Игнорируем ходы с 0 очков
                     if (points > 0 && points > bestMove.points) {
                         bestMove.points = points;
                         bestMove.row = i;
@@ -346,8 +329,6 @@ void botMakeMoveMedium() {
         checkAndAddWordDirect(bestMove.row, bestMove.col, 2);
     }
     else {
-        // Нет выигрышных ходов — ставим случайную букву в лучшую доступную клетку
-        // (перебираем все клетки, даже с 0 очков)
         for (int i = 0; i < BOARD_SIZE; i++) {
             for (int j = 0; j < BOARD_SIZE; j++) {
                 if (board[i][j].letter == 0 && hasAdjacentLetter(i, j)) {
@@ -378,7 +359,6 @@ void botMakeMoveMedium() {
     }
 }
 
-// Hard бот: минимакс (учитывает лучший ответ игрока)
 void botMakeMoveHard() {
     BotMove bestMove;
     bestMove.points = -999999;
@@ -392,7 +372,6 @@ void botMakeMoveHard() {
         return;
     }
 
-    // Сортируем ходы по очкам
     for (int i = 0; i < botMoveCount - 1; i++) {
         for (int j = i + 1; j < botMoveCount; j++) {
             if (botMoves[i].points < botMoves[j].points) {
@@ -462,7 +441,6 @@ void botMakeMoveHard() {
     }
 }
 
-// Основная функция бота
 void botMakeMove() {
     extern enum BotDifficulty botDifficulty;
 

@@ -10,7 +10,6 @@ static float boardStartX = -0.55f;
 static float boardStartY = -0.55f;
 static float cellSize = 0.22f;
 
-// Маленький шрифт для списка слов
 static GLuint smallFontBase = 0;
 
 void initSmallFont() {
@@ -44,24 +43,21 @@ void drawSmallRussianString(float x, float y, const char* str) {
 }
 
 void drawPlayerWords(float x, float y, struct PlayerWords* pw, const char* title, float r, float g, float b) {
-    // Заголовок (обычный шрифт)
     glColor3f(r, g, b);
     drawRussianString(x, y, title);
 
-    float lineY = y - 0.06f;  // Увеличен отступ после заголовка
+    float lineY = y - 0.06f;  
 
-    // Слова (маленький шрифт)
     for (int i = 0; i < pw->count && i < 20; i++) {
         char line[50];
         sprintf(line, "%s (%d)", pw->words[i], pw->scores[i]);
         glColor3f(0.85f, 0.85f, 0.85f);
         drawSmallRussianString(x, lineY, line);
-        lineY -= 0.045f;  // Увеличен отступ между словами
+        lineY -= 0.045f;  
 
         if (lineY < -0.85f) break;
     }
 
-    // Общий счёт
     char total[50];
     int totalScore = 0;
     for (int i = 0; i < pw->count; i++) {
@@ -76,7 +72,6 @@ void drawGameBoard() {
     glColor3f(1.0f, 1.0f, 1.0f);
     glLineWidth(2.0f);
 
-    // Рисуем сетку
     glBegin(GL_LINES);
     for (int i = 0; i <= BOARD_SIZE; i++) {
         float x = boardStartX + i * cellSize;
@@ -90,7 +85,6 @@ void drawGameBoard() {
     }
     glEnd();
 
-    // Рисуем буквы
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter != 0) {
@@ -104,10 +98,10 @@ void drawGameBoard() {
                     glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтая буква
                 }
                 else if (board[i][j].owner == 1) {
-                    glColor3f(0.3f, 0.8f, 0.3f);  // Зелёный (игрок 1)
+                    glColor3f(0.3f, 0.8f, 0.3f);  // Зелёный
                 }
                 else if (board[i][j].owner == 2) {
-                    glColor3f(0.9f, 0.3f, 0.3f);  // Красный (игрок 2 / бот)
+                    glColor3f(0.9f, 0.3f, 0.3f);  // Красный 
                 }
                 else {
                     glColor3f(1.0f, 1.0f, 1.0f);  // Белый
@@ -118,12 +112,11 @@ void drawGameBoard() {
         }
     }
 
-    // Рисуем рамку вокруг выбранной клетки (ПОВЕРХ буквы)
     if (selectedRow != -1 && selectedCol != -1) {
         float x = boardStartX + selectedCol * cellSize;
         float y = boardStartY + selectedRow * cellSize;
 
-        glColor3f(1.0f, 1.0f, 0.0f);  // Жёлтая рамка
+        glColor3f(1.0f, 1.0f, 0.0f);
         glLineWidth(3.0f);
         glBegin(GL_LINE_LOOP);
         glVertex2f(x + 0.02f, y + 0.02f);
@@ -137,7 +130,6 @@ void drawGameBoard() {
 
 void drawGameUI() {
     if (gameMode == MODE_PVP) {
-        // Списки дальше от поля
         drawPlayerWords(-1.15f, 0.75f, &player1Words, "Player 1:", 0.3f, 0.8f, 0.3f);
         drawPlayerWords(0.80f, 0.75f, &player2Words, "Player 2:", 0.9f, 0.5f, 0.3f);
     }

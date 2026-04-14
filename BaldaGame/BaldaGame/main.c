@@ -14,7 +14,6 @@
 
 GLFWwindow* window;
 
-// Преобразование координат мыши в клетку поля
 void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
@@ -56,7 +55,6 @@ void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
     }
 }
 
-// Обработка клика мыши
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
     if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
@@ -74,9 +72,16 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
 }
 
 
-// Отрисовка кадра
-void display() {
+void displayWithHighlight(int highlight) {
     glClear(GL_COLOR_BUFFER_BIT);
+
+    int savedRow = selectedRow;
+    int savedCol = selectedCol;
+
+    if (!highlight) {
+        selectedRow = -1;
+        selectedCol = -1;
+    }
 
     switch (gameState) {
     case STATE_MENU:
@@ -99,29 +104,35 @@ void display() {
         break;
     }
 
+    selectedRow = savedRow;
+    selectedCol = savedCol;
+
     glfwSwapBuffers(window);
 }
 
-// Функция для хода бота с обновлением экрана
+void display() {
+    displayWithHighlight(1);
+}
+
 void botTurn() {
     printf("Bot turn\n");
 
-    // Ход бота
-    botMakeMove();
-
-    // Принудительно обновляем экран после хода бота
-    display();
-    glfwSwapBuffers(window);
+    displayWithHighlight(0);
     glfwPollEvents();
 
-    // Небольшая задержка для визуального эффекта
+    Sleep(100);
+
+    botMakeMove();
+
+    displayWithHighlight(0);
+    glfwPollEvents();
+
     Sleep(100);
 }
 
 // Обработка клавиш
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
-        // Глобальные клавиши F1-F4
         switch (key) {
         case GLFW_KEY_F1:
             selectingMode = 0;
@@ -197,13 +208,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                             printf("No valid words found!\n");
                         }
 
-                        // Смена хода
                         if (gameMode == MODE_PVP) {
                             currentPlayer = (currentPlayer == 1) ? 2 : 1;
                             printf("Now Player %d turn\n", currentPlayer);
                         }
                         else {
-                            // Передаём ход боту
                             currentPlayer = 2;
                             botTurn();
                             currentPlayer = 1;

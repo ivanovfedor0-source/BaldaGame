@@ -41,7 +41,6 @@ void addPoints(int points, int player);
 void addWordToPlayer(int player, const char* word, int points);
 void clearPlayerWords();
 
-// Функции для работы со списком использованных слов
 int isWordUsedGlobal(const char* word);
 void addUsedWordGlobal(const char* word);
 int getUsedWordsCount(void);

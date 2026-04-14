@@ -48,26 +48,21 @@ void drawCentered(float y, const char* str, float r, float g, float b) {
     drawString(-textWidth / 2, y, str);
 }
 
-// Универсальный пункт меню со стрелкой и сдвигом текста
 void drawMenuItem(float y, const char* str, int isSelected, float offsetX) {
     if (isSelected) {
-        // Стрелка слева
         glColor3f(1.0f, 0.8f, 0.0f);
         drawString(offsetX - 0.08f, y, ">");
 
-        // Текст со смещением вправо
         glColor3f(1.0f, 1.0f, 1.0f);
         drawString(offsetX + 0.05f, y, str);
     }
     else {
-        // Обычный пункт (без стрелки, без смещения)
         glColor3f(0.8f, 0.8f, 0.8f);
         drawString(offsetX, y, str);
     }
 }
 
 void drawMenu() {
-    // Заголовки — строго по центру
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.68f, "BALDA", 1.0f, 0.8f, 0.0f);
 
