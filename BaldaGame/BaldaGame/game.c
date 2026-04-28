@@ -148,7 +148,7 @@ int checkAndAddWordDirect(int row, int col, int player) {
     int bestPoints = 0;
     char bestWord[30] = "";
 
-    printf("\n=== Checking words at (%d,%d) ===\n", row, col);
+    printf("\n=== Checking words containing cell (%d,%d) ===\n", row, col);
 
     printf("Current board:\n");
     for (int i = 0; i < BOARD_SIZE; i++) {
@@ -161,68 +161,78 @@ int checkAndAddWordDirect(int row, int col, int player) {
 
     printf("\n--- Found candidates ---\n");
 
-    BFSState queue[MAX_QUEUE];
-    int front = 0, rear = 0;
+    // Запускаем BFS от КАЖДОЙ клетки с буквой
+    for (int startRow = 0; startRow < BOARD_SIZE; startRow++) {
+        for (int startCol = 0; startCol < BOARD_SIZE; startCol++) {
+            if (board[startRow][startCol].letter == 0) continue;
 
-    queue[rear].row = row;
-    queue[rear].col = col;
-    queue[rear].word[0] = board[row][col].letter;
-    queue[rear].word[1] = '\0';
-    queue[rear].len = 1;
-    memset(queue[rear].visited, 0, sizeof(queue[rear].visited));
-    queue[rear].visited[row][col] = 1;
-    rear++;
+            BFSState queue[MAX_QUEUE];
+            int front = 0, rear = 0;
 
-    while (front < rear) {
-        BFSState current = queue[front];
-        front++;
+            queue[rear].row = startRow;
+            queue[rear].col = startCol;
+            queue[rear].word[0] = board[startRow][startCol].letter;
+            queue[rear].word[1] = '\0';
+            queue[rear].len = 1;
+            memset(queue[rear].visited, 0, sizeof(queue[rear].visited));
+            queue[rear].visited[startRow][startCol] = 1;
+            rear++;
 
-        if (current.len >= 3 && current.len <= 8) {
-            char wordCopy[30];
-            strcpy(wordCopy, current.word);
+            while (front < rear) {
+                BFSState current = queue[front];
+                front++;
 
-            if (isWordInDictionary(wordCopy) && !isWordUsed(wordCopy)) {
-                printf("  Candidate: '%s' (len=%d)\n", wordCopy, current.len);
-                if (current.len > bestPoints) {
-                    bestPoints = current.len;
-                    strcpy(bestWord, wordCopy);
-                }
-            }
-            else {
-                char reversed[30];
-                strcpy(reversed, wordCopy);
-                reverseString(reversed);
-                if (isWordInDictionary(reversed) && !isWordUsed(reversed)) {
-                    printf("  Candidate (reversed): '%s' -> '%s' (len=%d)\n", wordCopy, reversed, current.len);
-                    if (current.len > bestPoints) {
-                        bestPoints = current.len;
-                        strcpy(bestWord, reversed);
+                if (current.len >= 3 && current.len <= 8) {
+                    // Проверяем, содержит ли слово нашу новую клетку
+                    if (current.visited[row][col]) {
+                        char wordCopy[30];
+                        strcpy(wordCopy, current.word);
+
+                        if (isWordInDictionary(wordCopy) && !isWordUsed(wordCopy)) {
+                            printf("  Candidate: '%s' (len=%d)\n", wordCopy, current.len);
+                            if (current.len > bestPoints) {
+                                bestPoints = current.len;
+                                strcpy(bestWord, wordCopy);
+                            }
+                        }
+                        else {
+                            char reversed[30];
+                            strcpy(reversed, wordCopy);
+                            reverseString(reversed);
+                            if (isWordInDictionary(reversed) && !isWordUsed(reversed)) {
+                                printf("  Candidate (reversed): '%s' -> '%s' (len=%d)\n", wordCopy, reversed, current.len);
+                                if (current.len > bestPoints) {
+                                    bestPoints = current.len;
+                                    strcpy(bestWord, reversed);
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
 
-        if (current.len >= 8) continue;
+                if (current.len >= 8) continue;
 
-        int dr[] = { -1, 1, 0, 0 };
-        int dc[] = { 0, 0, -1, 1 };
+                int dr[] = { -1, 1, 0, 0 };
+                int dc[] = { 0, 0, -1, 1 };
 
-        for (int i = 0; i < 4; i++) {
-            int newRow = current.row + dr[i];
-            int newCol = current.col + dc[i];
+                for (int i = 0; i < 4; i++) {
+                    int newRow = current.row + dr[i];
+                    int newCol = current.col + dc[i];
 
-            if (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE) {
-                if (board[newRow][newCol].letter != 0 && !current.visited[newRow][newCol]) {
-                    if (rear < MAX_QUEUE) {
-                        queue[rear].row = newRow;
-                        queue[rear].col = newCol;
-                        strcpy(queue[rear].word, current.word);
-                        queue[rear].word[current.len] = board[newRow][newCol].letter;
-                        queue[rear].word[current.len + 1] = '\0';
-                        queue[rear].len = current.len + 1;
-                        memcpy(queue[rear].visited, current.visited, sizeof(current.visited));
-                        queue[rear].visited[newRow][newCol] = 1;
-                        rear++;
+                    if (newRow >= 0 && newRow < BOARD_SIZE && newCol >= 0 && newCol < BOARD_SIZE) {
+                        if (board[newRow][newCol].letter != 0 && !current.visited[newRow][newCol]) {
+                            if (rear < MAX_QUEUE) {
+                                queue[rear].row = newRow;
+                                queue[rear].col = newCol;
+                                strcpy(queue[rear].word, current.word);
+                                queue[rear].word[current.len] = board[newRow][newCol].letter;
+                                queue[rear].word[current.len + 1] = '\0';
+                                queue[rear].len = current.len + 1;
+                                memcpy(queue[rear].visited, current.visited, sizeof(current.visited));
+                                queue[rear].visited[newRow][newCol] = 1;
+                                rear++;
+                            }
+                        }
                     }
                 }
             }
