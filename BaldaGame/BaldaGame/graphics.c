@@ -186,9 +186,22 @@ void drawGameOver() {
     glColor3f(1.0f, 1.0f, 1.0f);
     drawCentered(0.35f, scoreText, 1.0f, 1.0f, 1.0f);
 
+    // ========== НОВЫЙ РЕКОРД ==========
+    int isNewRecord = 0;
+    if (gameMode == MODE_PVE && playerScore > botScore) {
+        if (isHighScore(playerScore, botDifficulty)) {
+            isNewRecord = 1;
+        }
+    }
+
+    if (isNewRecord) {
+        glColor3f(1.0f, 0.8f, 0.0f);
+        drawTitleString(-0.40f, 0.20f, "NEW RECORD!");
+    }
+
     // Подсказка
     glColor3f(0.5f, 0.5f, 0.5f);
-    drawCentered(-0.65f, "Press SPACE or ENTER to return to menu", 0.5f, 0.5f, 0.5f);
+    drawCentered(-0.9f, "Press SPACE or ENTER to return to menu", 0.5f, 0.5f, 0.5f);
 
     // Восстанавливаем исходный цвет фона
     glClearColor(oldColor[0], oldColor[1], oldColor[2], oldColor[3]);

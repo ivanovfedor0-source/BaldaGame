@@ -158,7 +158,22 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
                 return;
             }
         }
+        // ========== ÊËÈÊ Â ÈÃÐÅ ==========
+        if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+
+            int row, col;
+            getCellFromMouse(xpos, ypos, &row, &col);
+
+            if (row >= 0 && col >= 0 && isCellEmpty(row, col)) {
+                selectedRow = row;
+                selectedCol = col;
+                currentInputLetter = '\0';
+            }
+        }
     }
+
 
 }
 
