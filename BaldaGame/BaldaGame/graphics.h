@@ -16,5 +16,6 @@ void drawRecords(void);
 void drawNameInput(void);
 void drawGameOver(void);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
+void drawBackButton(void);
 
 #endif

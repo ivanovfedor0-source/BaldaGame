@@ -57,6 +57,130 @@ void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
+
+    if (action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+
+        // Получаем размер окна и нормализуем координаты
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        float nx = (float)xpos / width;
+        float ny = 1.0f - (float)ypos / height;
+
+        // Статическая переменная для хранения времени последнего клика
+        static double lastClickTime = 0;
+        static int lastClickItem = -1;
+        double currentTime = glfwGetTime();
+
+
+        // ========== ПРОВЕРКА КЛИКА ПО СТРЕЛКЕ "НАЗАД" ==========
+        if (xpos >= 520 && xpos <= 570 && ypos >= 20 && ypos <= 60) {
+            // Если в выборе сложности — вернуться к выбору режима
+            if (gameState == STATE_GAME && askingName && gameMode == MODE_PVE) {
+                askingName = 0;
+                nameInputLen = 0;
+                nameInput[0] = '\0';
+                selectingDifficulty = 1;
+                selectedMenuItem = botDifficulty;
+                gameState = STATE_MENU;
+                return;
+            }
+            // Если в выборе сложности — вернуться к выбору режима
+            else if (selectingDifficulty) {
+                selectingDifficulty = 0;
+                selectingMode = 1;
+                selectedMenuItem = 0;
+                return;
+            }
+            // Если в выборе режима — вернуться в главное меню
+            else if (selectingMode) {
+                selectingMode = 0;
+                selectingDifficulty = 0;
+                selectedMenuItem = 0;
+                return;
+            }
+            // Если в рекордах, справке — в главное меню
+            else if (gameState == STATE_RECORDS || gameState == STATE_HELP) {
+                gameState = STATE_MENU;
+                selectingMode = 0;
+                selectingDifficulty = 0;
+                selectedMenuItem = 0;
+                return;
+            }
+        }
+
+        // ========== КЛИК В ГЛАВНОМ МЕНЮ ==========
+        if (gameState == STATE_MENU && !selectingMode && !selectingDifficulty) {
+            int item = -1;
+            // Координаты из твоего теста
+            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.45 && nx <= 0.58) item = 0;  // New Game
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.55) item = 1; // Records
+            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.55) item = 2; // Help
+            else if (ny >= 0.48 && ny <= 0.54 && nx >= 0.42 && nx <= 0.55) item = 3; // Exit
+
+            if (item != -1) {
+                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
+                    selectedMenuItem = item;
+                    menuSelect();
+                    lastClickTime = 0;
+                    lastClickItem = -1;
+                }
+                else {
+                    selectedMenuItem = item;
+                    lastClickTime = currentTime;
+                    lastClickItem = item;
+                }
+                return;
+            }
+        }
+
+        // ========== КЛИК В МЕНЮ ВЫБОРА РЕЖИМА ==========
+        if (gameState == STATE_MENU && selectingMode && !selectingDifficulty) {
+            int item = -1;
+            if (ny >= 0.66 && ny <= 0.73 && nx >= 0.45 && nx <= 0.58) item = 0;  // Player vs Player
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.45 && nx <= 0.58) item = 1; // Player vs Bot
+
+            if (item != -1) {
+                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
+                    selectedMenuItem = item;
+                    menuSelect();
+                    lastClickTime = 0;
+                    lastClickItem = -1;
+                }
+                else {
+                    selectedMenuItem = item;
+                    lastClickTime = currentTime;
+                    lastClickItem = item;
+                }
+                return;
+            }
+        }
+
+        // ========== КЛИК В МЕНЮ ВЫБОРА СЛОЖНОСТИ ==========
+        if (gameState == STATE_MENU && selectingDifficulty) {
+            int item = -1;
+            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;  // Easy
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.58) item = 1; // Medium
+            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.58) item = 2; // Hard
+
+            if (item != -1) {
+                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
+                    selectedMenuItem = item;
+                    menuSelect();
+                    lastClickTime = 0;
+                    lastClickItem = -1;
+                }
+                else {
+                    selectedMenuItem = item;
+                    lastClickTime = currentTime;
+                    lastClickItem = item;
+                }
+                return;
+            }
+        }
+    }
+
     if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
@@ -70,6 +194,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             currentInputLetter = '\0';
         }
     }
+
+
 }
 
 

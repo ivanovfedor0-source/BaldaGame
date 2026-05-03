@@ -194,6 +194,11 @@ void drawGameOver() {
     glClearColor(oldColor[0], oldColor[1], oldColor[2], oldColor[3]);
 }
 
+void drawBackButton() {
+    // Рисуем стрелку в левом верхнем углу
+    glColor3f(0.7f, 0.7f, 0.7f);
+    drawString(-0.95f, 0.90f, "<-- Back");
+}
 
 void drawMenu() {
     // Огромный заголовок
@@ -205,6 +210,9 @@ void drawMenu() {
 
     // Меню выбора сложности
     if (selectingDifficulty) {
+
+        drawBackButton();
+
         const char* diffItems[] = { "Easy", "Medium", "Hard" };
         for (int i = 0; i < 3; i++) {
             float y = 0.35f - i * 0.12f;
@@ -226,6 +234,8 @@ void drawMenu() {
 
     // Меню выбора режима
     if (selectingMode) {
+        drawBackButton();
+
         const char* modeItems[] = { "Player vs Player", "Player vs Bot" };
         for (int i = 0; i < 2; i++) {
             float y = 0.35f - i * 0.12f;
@@ -265,6 +275,9 @@ void drawMenu() {
 }
 
 void drawHelp() {
+
+    drawBackButton();
+
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.85f, "HELP", 1.0f, 0.8f, 0.0f);
 
@@ -286,6 +299,9 @@ void drawHelp() {
 }
 
 void drawRecords() {
+
+    drawBackButton();
+
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.85f, "RECORDS", 1.0f, 0.8f, 0.0f);
 
@@ -310,19 +326,49 @@ void drawRecords() {
     loadRecordsForDisplay();
     Record* records = getCurrentRecords();
 
-    // Отображаем таблицу
+    // Шапка таблицы
     glColor3f(1.0f, 1.0f, 1.0f);
-    drawString(-0.6f, 0.55f, "#  Name             Score     Date");
+    drawString(-0.65f, 0.60f, "#");
+    drawString(-0.55f, 0.60f, "Name");
+    drawString(0.15f, 0.60f, "Score");
+    drawString(0.55f, 0.60f, "Date");
 
+    // Разделительная линия
+    glBegin(GL_LINES);
+    glVertex2f(-0.70f, 0.57f);
+    glVertex2f(0.85f, 0.57f);
+    glEnd();
+
+    // Вывод записей
     for (int i = 0; i < 5; i++) {
-        char line[50];
+        float y = 0.50f - i * 0.08f;
+
+        // Номер
+        char numStr[5];
+        sprintf(numStr, "%d.", i + 1);
+        drawString(-0.65f, y, numStr);
+
+        // Имя (фиксированная ширина 12 символов)
+        char nameStr[20];
         if (records[i].score > 0) {
-            sprintf(line, "%d. %-16s %-8d %s", i + 1, records[i].name, records[i].score, records[i].date);
+            sprintf(nameStr, "%-12s", records[i].name);
         }
         else {
-            sprintf(line, "%d. ---", i + 1);
+            sprintf(nameStr, "%-12s", "---");
         }
-        drawString(-0.6f, 0.48f - i * 0.08f, line);
+        drawString(-0.55f, y, nameStr);
+
+        // Очки
+        char scoreStr[10];
+        if (records[i].score > 0) {
+            sprintf(scoreStr, "%d", records[i].score);
+            drawString(0.15f, y, scoreStr);
+        }
+
+        // Дата
+        if (records[i].score > 0 && strlen(records[i].date) > 0) {
+            drawString(0.55f, y, records[i].date);
+        }
     }
 
     glColor3f(0.5f, 0.5f, 0.5f);
@@ -330,6 +376,9 @@ void drawRecords() {
 }
 
 void drawNameInput() {
+
+    drawBackButton();
+
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.75f, "ENTER YOUR NAME", 1.0f, 0.8f, 0.0f);
 
@@ -363,3 +412,4 @@ void framebufferSizeCallback(GLFWwindow* window, int width, int height) {
 
     glMatrixMode(GL_MODELVIEW);
 }
+
