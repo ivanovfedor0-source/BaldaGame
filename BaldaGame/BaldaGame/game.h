@@ -48,5 +48,7 @@ void clearUsedWords(void);
 
 void copyUsedWords(char dest[1000][30], int* destCount);
 void restoreUsedWords(char src[1000][30], int srcCount);
+int isGameOver(void);
+void forceRedraw(void);
 
 #endif

@@ -147,6 +147,7 @@
     <ClCompile Include="graphics.c" />
     <ClCompile Include="main.c" />
     <ClCompile Include="menu.c" />
+    <ClCompile Include="record.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bot.h" />
@@ -156,6 +157,7 @@
     <ClInclude Include="game.h" />
     <ClInclude Include="graphics.h" />
     <ClInclude Include="menu.h" />
+    <ClInclude Include="record.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\..\data\dictionary.txt" />

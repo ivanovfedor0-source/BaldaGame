@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <GLFW/glfw3.h>
+#include "record.h"
 
 #define MAX_QUEUE 5000
 
@@ -142,7 +143,6 @@ void reverseString(char* str) {
         str[len - 1 - i] = temp;
     }
 }
-
 int checkAndAddWordDirect(int row, int col, int player) {
     int totalPoints = 0;
     int bestPoints = 0;
@@ -183,7 +183,6 @@ int checkAndAddWordDirect(int row, int col, int player) {
                 front++;
 
                 if (current.len >= 3 && current.len <= 8) {
-                    // Проверяем, содержит ли слово нашу новую клетку
                     if (current.visited[row][col]) {
                         char wordCopy[30];
                         strcpy(wordCopy, current.word);
@@ -253,9 +252,28 @@ int checkAndAddWordDirect(int row, int col, int player) {
     }
 
     printf(">>> Total +%d points!\n", totalPoints);
+
+    // ========== ПРОВЕРКА ОКОНЧАНИЯ ИГРЫ ==========
+    if (isGameOver()) {
+        printf("\n========================================\n");
+        printf("GAME OVER! No empty cells left.\n");
+        printf("========================================\n");
+
+        if (gameMode == MODE_PVE && playerScore > botScore) {
+            if (isHighScore(playerScore, botDifficulty)) {
+                addRecord(playerName, playerScore, botDifficulty);
+                printf("New record for %s difficulty! %s scored %d points\n",
+                    botDifficulty == DIFFICULTY_EASY ? "Easy" :
+                    botDifficulty == DIFFICULTY_MEDIUM ? "Medium" : "Hard",
+                    playerName, playerScore);
+            }
+        }
+
+        gameState = STATE_GAME_OVER;
+    }
+
     return totalPoints;
 }
-
 
 int isWordUsedGlobal(const char* word) {
     for (int i = 0; i < usedWordsCount; i++) {
@@ -334,4 +352,16 @@ void clearSelection() {
     selectedRow = -1;
     selectedCol = -1;
     currentInputLetter = '\0';
+}
+
+// Проверка, заполнено ли всё поле
+int isGameOver() {
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (board[i][j].letter == 0) {
+                return 0; // Есть хотя бы одна пустая клетка — игра продолжается
+            }
+        }
+    }
+    return 1; // Нет пустых клеток — игра окончена
 }

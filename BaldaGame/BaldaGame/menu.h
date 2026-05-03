@@ -5,7 +5,8 @@ enum GameState {
     STATE_MENU = 0,
     STATE_GAME = 1,
     STATE_HELP = 2,
-    STATE_RECORDS = 3
+    STATE_RECORDS = 3,
+    STATE_GAME_OVER = 4
 };
 
 enum GameMode {
@@ -30,5 +31,6 @@ void initMenu();
 void menuUp();
 void menuDown();
 void menuSelect();
+void menuBack(void);
 
 #endif

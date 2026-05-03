@@ -1,4 +1,4 @@
-#include "menu.h"
+﻿#include "menu.h"
 #include "graphics.h"
 #include "game.h"
 #include <GLFW/glfw3.h>
@@ -53,7 +53,7 @@ void menuDown() {
 }
 
 void menuSelect() {
-    // ����� ���������
+    // Выбор сложности
     if (selectingDifficulty) {
         switch (selectedMenuItem) {
         case 0:
@@ -75,7 +75,7 @@ void menuSelect() {
         return;
     }
 
-    // ����� ������ (PVP / PVE)
+    // Выбор режима (PVP / PVE)
     if (selectingMode) {
         switch (selectedMenuItem) {
         case 0:
@@ -97,7 +97,7 @@ void menuSelect() {
         return;
     }
 
-    // ������� ����
+    // Главное меню
     switch (selectedMenuItem) {
     case 0:
         selectingMode = 1;
@@ -113,4 +113,18 @@ void menuSelect() {
         exit(0);
         break;
     }
+}
+void menuBack() {
+    if (selectingDifficulty) {
+        // Из выбора сложности → в выбор режима
+        selectingDifficulty = 0;
+        selectingMode = 1;
+        selectedMenuItem = 0;
+    }
+    else if (selectingMode) {
+        // Из выбора режима → в главное меню
+        selectingMode = 0;
+        selectedMenuItem = 0;
+    }
+    // В главном меню стрелка влево не делает ничего
 }

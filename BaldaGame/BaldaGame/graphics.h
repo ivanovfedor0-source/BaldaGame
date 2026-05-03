@@ -4,13 +4,17 @@
 #include <GLFW/glfw3.h>
 #include "menu.h"
 
-void initFont();
+void initFont(void);
+void initTitleFont(void);        // <-- ÄÎÁÀÂÈÒÜ ÝÒÓ ÑÒÐÎÊÓ
+void initSmallFont(void);
+void initMenuItemsFont(void);
 void drawString(float x, float y, const char* str);
 void drawCentered(float y, const char* str, float r, float g, float b);
-void drawMenu();
-void drawHelp();
-void drawRecords();
-void drawNameInput();
+void drawMenu(void);
+void drawHelp(void);
+void drawRecords(void);
+void drawNameInput(void);
+void drawGameOver(void);
 void framebufferSizeCallback(GLFWwindow* window, int width, int height);
 
 #endif

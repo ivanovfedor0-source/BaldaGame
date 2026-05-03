@@ -11,6 +11,7 @@
 #include "font.h"
 #include "dictionary.h"
 #include "bot.h"
+#include "record.h"
 
 GLFWwindow* window;
 
@@ -102,6 +103,9 @@ void displayWithHighlight(int highlight) {
             drawGameUI();
         }
         break;
+    case STATE_GAME_OVER:
+        drawGameOver();
+        break;
     }
 
     selectedRow = savedRow;
@@ -112,6 +116,12 @@ void displayWithHighlight(int highlight) {
 
 void display() {
     displayWithHighlight(1);
+}
+
+void forceRedraw() {
+    display();
+    glfwSwapBuffers(window);
+    glfwPollEvents();
 }
 
 void botTurn() {
@@ -128,11 +138,32 @@ void botTurn() {
     glfwPollEvents();
 
     Sleep(100);
+
+    if (isGameOver()) {
+        gameState = STATE_GAME_OVER;
+        display();
+        glfwSwapBuffers(window);
+
+        // Ждём нажатия пробела или Enter
+        while (1) {
+            glfwPollEvents();
+            if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
+                glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+                break;
+            }
+            Sleep(50);
+        }
+
+        gameState = STATE_MENU;
+        selectingMode = 0;
+        selectingDifficulty = 0;
+        selectedMenuItem = 0;
+    }
 }
 
-// Обработка клавиш
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
+        // ========== ГЛОБАЛЬНЫЕ КЛАВИШИ (РАБОТАЮТ ВЕЗДЕ) ==========
         switch (key) {
         case GLFW_KEY_F1:
             selectingMode = 0;
@@ -143,6 +174,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         case GLFW_KEY_F2:
             gameState = STATE_RECORDS;
+            loadRecordsForDisplay();
             return;
         case GLFW_KEY_F3:
             gameState = STATE_HELP;
@@ -152,7 +184,30 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // Ввод имени
+        // ========== УПРАВЛЕНИЕ В ТАБЛИЦЕ РЕКОРДОВ ==========
+        if (gameState == STATE_RECORDS) {
+            switch (key) {
+            case GLFW_KEY_LEFT:
+            {
+                int newDiff = getRecordsDifficulty() - 1;
+                if (newDiff < 0) newDiff = 2;
+                setRecordsDifficulty(newDiff);
+                loadRecordsForDisplay();
+            }
+            break;
+            case GLFW_KEY_RIGHT:
+            {
+                int newDiff = getRecordsDifficulty() + 1;
+                if (newDiff > 2) newDiff = 0;
+                setRecordsDifficulty(newDiff);
+                loadRecordsForDisplay();
+            }
+            break;
+            }
+            return;
+        }
+
+        // ========== ВВОД ИМЕНИ ==========
         if (gameState == STATE_GAME && askingName) {
             if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
                 if (nameInputLen < 15) {
@@ -171,20 +226,39 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 initGame();
                 printf("Player name set to: %s\n", playerName);
             }
-            return;
-        }
-
-        // Управление в меню
-        if (gameState == STATE_MENU) {
-            switch (key) {
-            case GLFW_KEY_UP: menuUp(); break;
-            case GLFW_KEY_DOWN: menuDown(); break;
-            case GLFW_KEY_ENTER: menuSelect(); break;
+            else if (key == GLFW_KEY_LEFT) {
+                // Возврат к выбору сложности
+                askingName = 0;
+                nameInputLen = 0;
+                nameInput[0] = '\0';
+                selectingMode = 0;
+                selectingDifficulty = 1;
+                selectedMenuItem = botDifficulty;
+                gameState = STATE_MENU;
             }
             return;
         }
 
-        // Управление в игре
+        // ========== УПРАВЛЕНИЕ В МЕНЮ ==========
+        if (gameState == STATE_MENU) {
+            switch (key) {
+            case GLFW_KEY_UP:
+                menuUp();
+                break;
+            case GLFW_KEY_DOWN:
+                menuDown();
+                break;
+            case GLFW_KEY_LEFT:
+                menuBack();  // Возврат в предыдущее меню
+                break;
+            case GLFW_KEY_ENTER:
+                menuSelect();
+                break;
+            }
+            return;
+        }
+
+        // ========== УПРАВЛЕНИЕ В ИГРЕ ==========
         if (gameState == STATE_GAME && !askingName) {
             if (selectedRow != -1 && selectedCol != -1) {
                 unsigned char rusLetter = getRussianLetter(key);
@@ -207,6 +281,44 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                         if (points == 0) {
                             printf("No valid words found!\n");
                         }
+                        // Принудительно показываем ход игрока
+                        displayWithHighlight(1);
+                        glfwSwapBuffers(window);
+                        glfwPollEvents();
+                        Sleep(80);
+
+                        // Проверяем, заполнено ли поле
+                        int gameOver = 1;
+                        for (int i = 0; i < BOARD_SIZE; i++) {
+                            for (int j = 0; j < BOARD_SIZE; j++) {
+                                if (board[i][j].letter == 0) {
+                                    gameOver = 0;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (gameOver) {
+                            // Показываем экран окончания
+                            drawGameOver();
+                            glfwSwapBuffers(window);
+
+                            // Ждём нажатия пробела или Enter
+                            while (1) {
+                                glfwPollEvents();
+                                if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
+                                    glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+                                    break;
+                                }
+                                Sleep(50);
+                            }
+
+                            gameState = STATE_MENU;
+                            selectingMode = 0;
+                            selectingDifficulty = 0;
+                            selectedMenuItem = 0;
+                            return;
+                        }
 
                         if (gameMode == MODE_PVP) {
                             currentPlayer = (currentPlayer == 1) ? 2 : 1;
@@ -215,6 +327,28 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                         else {
                             currentPlayer = 2;
                             botTurn();
+
+                            // После хода бота проверяем окончание игры
+                            if (gameState == STATE_GAME_OVER) {
+                                displayWithHighlight(1);
+                                glfwSwapBuffers(window);
+
+                                while (1) {
+                                    glfwPollEvents();
+                                    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
+                                        glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS) {
+                                        break;
+                                    }
+                                    Sleep(50);
+                                }
+
+                                gameState = STATE_MENU;
+                                selectingMode = 0;
+                                selectingDifficulty = 0;
+                                selectedMenuItem = 0;
+                                return;
+                            }
+
                             currentPlayer = 1;
                         }
                     }
@@ -254,9 +388,11 @@ int main() {
     initFont();
     initRussianFont();
     initSmallFont();
+    initTitleFont();
+    initMenuItemsFont();
 
     loadDictionary("C:/BaldaCoursework/data/dictionary.txt");
-
+    initRecords();
     initMenu();
     initGame();
 
