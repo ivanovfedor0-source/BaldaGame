@@ -57,7 +57,6 @@ void getCellFromMouse(double xpos, double ypos, int* row, int* col) {
 }
 
 void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
-
     if (action == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
@@ -68,15 +67,8 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         float nx = (float)xpos / width;
         float ny = 1.0f - (float)ypos / height;
 
-        // Статическая переменная для хранения времени последнего клика
-        static double lastClickTime = 0;
-        static int lastClickItem = -1;
-        double currentTime = glfwGetTime();
-
-
         // ========== ПРОВЕРКА КЛИКА ПО СТРЕЛКЕ "НАЗАД" ==========
         if (xpos >= 520 && xpos <= 570 && ypos >= 20 && ypos <= 60) {
-            // Если в выборе сложности — вернуться к выбору режима
             if (gameState == STATE_GAME && askingName && gameMode == MODE_PVE) {
                 askingName = 0;
                 nameInputLen = 0;
@@ -86,21 +78,18 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
                 gameState = STATE_MENU;
                 return;
             }
-            // Если в выборе сложности — вернуться к выбору режима
             else if (selectingDifficulty) {
                 selectingDifficulty = 0;
                 selectingMode = 1;
                 selectedMenuItem = 0;
                 return;
             }
-            // Если в выборе режима — вернуться в главное меню
             else if (selectingMode) {
                 selectingMode = 0;
                 selectingDifficulty = 0;
                 selectedMenuItem = 0;
                 return;
             }
-            // Если в рекордах, справке — в главное меню
             else if (gameState == STATE_RECORDS || gameState == STATE_HELP) {
                 gameState = STATE_MENU;
                 selectingMode = 0;
@@ -109,28 +98,36 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
                 return;
             }
         }
+        // ========== КЛИК В ТАБЛИЦЕ РЕКОРДОВ (выбор сложности) ==========
+        if (gameState == STATE_RECORDS && ny >= 0.85 && ny <= 0.89) {
+            if (nx >= 0.32 && nx <= 0.42) {
+                setRecordsDifficulty(DIFFICULTY_EASY);
+                loadRecordsForDisplay();
+                return;
+            }
+            else if (nx >= 0.44 && nx <= 0.54) {
+                setRecordsDifficulty(DIFFICULTY_MEDIUM);
+                loadRecordsForDisplay();
+                return;
+            }
+            else if (nx >= 0.56 && nx <= 0.66) {
+                setRecordsDifficulty(DIFFICULTY_HARD);
+                loadRecordsForDisplay();
+                return;
+            }
+        }
 
         // ========== КЛИК В ГЛАВНОМ МЕНЮ ==========
         if (gameState == STATE_MENU && !selectingMode && !selectingDifficulty) {
             int item = -1;
-            // Координаты из твоего теста
-            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.45 && nx <= 0.58) item = 0;  // New Game
-            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.55) item = 1; // Records
-            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.55) item = 2; // Help
-            else if (ny >= 0.48 && ny <= 0.54 && nx >= 0.42 && nx <= 0.55) item = 3; // Exit
+            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.58) item = 1;
+            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.58) item = 2;
+            else if (ny >= 0.48 && ny <= 0.54 && nx >= 0.42 && nx <= 0.58) item = 3;
 
             if (item != -1) {
-                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
-                    selectedMenuItem = item;
-                    menuSelect();
-                    lastClickTime = 0;
-                    lastClickItem = -1;
-                }
-                else {
-                    selectedMenuItem = item;
-                    lastClickTime = currentTime;
-                    lastClickItem = item;
-                }
+                selectedMenuItem = item;
+                menuSelect();
                 return;
             }
         }
@@ -138,21 +135,12 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         // ========== КЛИК В МЕНЮ ВЫБОРА РЕЖИМА ==========
         if (gameState == STATE_MENU && selectingMode && !selectingDifficulty) {
             int item = -1;
-            if (ny >= 0.66 && ny <= 0.73 && nx >= 0.45 && nx <= 0.58) item = 0;  // Player vs Player
-            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.45 && nx <= 0.58) item = 1; // Player vs Bot
+            if (ny >= 0.66 && ny <= 0.73 && nx >= 0.42 && nx <= 0.58) item = 0;
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.58) item = 1;
 
             if (item != -1) {
-                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
-                    selectedMenuItem = item;
-                    menuSelect();
-                    lastClickTime = 0;
-                    lastClickItem = -1;
-                }
-                else {
-                    selectedMenuItem = item;
-                    lastClickTime = currentTime;
-                    lastClickItem = item;
-                }
+                selectedMenuItem = item;
+                menuSelect();
                 return;
             }
         }
@@ -160,42 +148,52 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         // ========== КЛИК В МЕНЮ ВЫБОРА СЛОЖНОСТИ ==========
         if (gameState == STATE_MENU && selectingDifficulty) {
             int item = -1;
-            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;  // Easy
-            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.58) item = 1; // Medium
-            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.58) item = 2; // Hard
+            if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;
+            else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.58) item = 1;
+            else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.58) item = 2;
 
             if (item != -1) {
-                if (currentTime - lastClickTime < 0.3 && lastClickItem == item) {
-                    selectedMenuItem = item;
-                    menuSelect();
-                    lastClickTime = 0;
-                    lastClickItem = -1;
-                }
-                else {
-                    selectedMenuItem = item;
-                    lastClickTime = currentTime;
-                    lastClickItem = item;
-                }
+                selectedMenuItem = item;
+                menuSelect();
                 return;
             }
         }
     }
 
-    if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
+}
 
-        int row, col;
-        getCellFromMouse(xpos, ypos, &row, &col);
+void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
+    if (gameState != STATE_MENU) return;
 
-        if (row >= 0 && col >= 0 && isCellEmpty(row, col)) {
-            selectedRow = row;
-            selectedCol = col;
-            currentInputLetter = '\0';
-        }
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    float nx = (float)xpos / width;
+    float ny = 1.0f - (float)ypos / height;
+
+    int newItem = -1;
+
+    if (!selectingMode && !selectingDifficulty) {
+        // Главное меню (короткие пункты: New Game, Records, Help, Exit)
+        if (ny >= 0.66 && ny <= 0.72 && nx >= 0.45 && nx <= 0.56) newItem = 0;
+        else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.45 && nx <= 0.54) newItem = 1;
+        else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.45 && nx <= 0.50) newItem = 2;
+        else if (ny >= 0.48 && ny <= 0.54 && nx >= 0.45 && nx <= 0.50) newItem = 3;
+    }
+    else if (selectingMode && !selectingDifficulty) {
+        // Выбор режима (длинные пункты)
+        if (ny >= 0.66 && ny <= 0.73 && nx >= 0.43 && nx <= 0.58) newItem = 0;
+        else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.43 && nx <= 0.58) newItem = 1;
+    }
+    else if (selectingDifficulty) {
+        // Выбор сложности (короткие пункты: Easy, Medium, Hard)
+        if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.48) newItem = 0;
+        else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.51) newItem = 1;
+        else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.48) newItem = 2;
     }
 
-
+    if (newItem != -1 && newItem != selectedMenuItem) {
+        selectedMenuItem = newItem;
+    }
 }
 
 
@@ -508,7 +506,7 @@ int main() {
     glfwSetFramebufferSizeCallback(window, framebufferSizeCallback);
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
+    glfwSetCursorPosCallback(window, cursorPosCallback);
     framebufferSizeCallback(window, 800, 800);
 
     initFont();

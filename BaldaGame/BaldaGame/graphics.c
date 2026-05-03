@@ -206,7 +206,7 @@ void drawMenu() {
 
     // Подзаголовок (старый шрифт)
     glColor3f(0.7f, 0.7f, 0.7f);
-    drawCentered(0.60f, "WORD GAME", 0.7f, 0.7f, 0.7f);
+    drawCentered(0.66f, "WORD GAME", 0.7f, 0.7f, 0.7f);
 
     // Меню выбора сложности
     if (selectingDifficulty) {

@@ -1,5 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
-#pragma comment(linker, "/STACK:16777216")
+#pragma comment(linker, "/STACK:167772160")
 #include "bot.h"
 #include "game.h"
 #include "dictionary.h"
