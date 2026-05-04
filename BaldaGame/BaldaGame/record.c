@@ -36,6 +36,7 @@ void loadRecords(int difficulty) {
             strcpy(records[i].name, "---");
             records[i].score = 0;
             strcpy(records[i].date, "");
+            records[i].extra.intValue = 0;  // union для галочки
         }
         saveRecords(difficulty);
     }

@@ -3,10 +3,17 @@
 
 #include "menu.h"  // для BotDifficulty
 
+union RecordExtra {
+    int intValue;
+    float floatValue;
+    char stringValue[20];
+};
+
 typedef struct {
     char name[20];
     int score;
     char date[20];
+    union RecordExtra extra;
 } Record;
 
 // Инициализация таблицы рекордов для выбранной сложности

@@ -5,7 +5,7 @@
 #include "menu.h"
 
 void initFont(void);
-void initTitleFont(void);        // <-- ÄÎÁÀÂÈÒÜ ÝÒÓ ÑÒÐÎÊÓ
+void initTitleFont(void);
 void initSmallFont(void);
 void initMenuItemsFont(void);
 void drawString(float x, float y, const char* str);

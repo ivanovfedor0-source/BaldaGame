@@ -39,6 +39,9 @@
     <ClCompile Include="bot.c">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="record.c">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="menu.h">
@@ -61,6 +64,9 @@
     </ClInclude>
     <ClInclude Include="bot.h">
       <Filter>Исходные файлы</Filter>
+    </ClInclude>
+    <ClInclude Include="record.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

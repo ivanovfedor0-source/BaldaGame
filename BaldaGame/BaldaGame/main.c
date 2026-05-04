@@ -1,4 +1,5 @@
 #define _CRT_SECURE_NO_WARNINGS
+//#pragma comment(linker, "/subsystem:windows /entry:maincrtstartup")
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
