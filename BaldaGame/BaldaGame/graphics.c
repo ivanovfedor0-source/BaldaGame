@@ -64,7 +64,7 @@ void drawTitleString(float x, float y, const char* str) {
 
 void drawTitleCentered(float y, const char* str, float r, float g, float b) {
     glColor3f(r, g, b);
-    float textWidth = strlen(str) * 0.055f;  // Ширина буквы в координатах
+    float textWidth = strlen(str) * 0.055f;
     drawTitleString(-textWidth / 2, y, str);
 }
 
@@ -130,19 +130,15 @@ void drawMenuItemString(float x, float y, const char* str) {
 }
 
 void drawGameOver() {
-    // Временно сохраняем текущий цвет фона
     GLfloat oldColor[4];
     glGetFloatv(GL_COLOR_CLEAR_VALUE, oldColor);
 
-    // Устанавливаем тёмный фон для экрана окончания
     glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Заголовок
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.75f, "GAME OVER", 1.0f, 0.8f, 0.0f);
 
-    // Победитель
     char winnerText[50];
     char scoreText[50];
 
@@ -176,7 +172,6 @@ void drawGameOver() {
     }
     drawCentered(0.55f, winnerText, 1.0f, 1.0f, 1.0f);
 
-    // Счёт
     if (gameMode == MODE_PVP) {
         sprintf(scoreText, "%d  :  %d", playerScore, botScore);
     }
@@ -186,7 +181,6 @@ void drawGameOver() {
     glColor3f(1.0f, 1.0f, 1.0f);
     drawCentered(0.35f, scoreText, 1.0f, 1.0f, 1.0f);
 
-    // ========== НОВЫЙ РЕКОРД ==========
     int isNewRecord = 0;
     if (gameMode == MODE_PVE && playerScore > botScore) {
         if (isHighScore(playerScore, botDifficulty)) {
@@ -199,29 +193,23 @@ void drawGameOver() {
         drawTitleString(-0.40f, 0.20f, "NEW RECORD!");
     }
 
-    // Подсказка
     glColor3f(0.5f, 0.5f, 0.5f);
     drawCentered(-0.9f, "Press SPACE or ENTER to return to menu", 0.5f, 0.5f, 0.5f);
 
-    // Восстанавливаем исходный цвет фона
     glClearColor(oldColor[0], oldColor[1], oldColor[2], oldColor[3]);
 }
 
 void drawBackButton() {
-    // Рисуем стрелку в левом верхнем углу
     glColor3f(0.7f, 0.7f, 0.7f);
     drawString(-0.95f, 0.90f, "<-- Back");
 }
 
 void drawMenu() {
-    // Огромный заголовок
     drawTitleCentered(0.78f, "BALDA", 1.0f, 0.8f, 0.0f);
 
-    // Подзаголовок (старый шрифт)
     glColor3f(0.7f, 0.7f, 0.7f);
     drawCentered(0.66f, "WORD GAME", 0.7f, 0.7f, 0.7f);
 
-    // Меню выбора сложности
     if (selectingDifficulty) {
 
         drawBackButton();
@@ -231,9 +219,9 @@ void drawMenu() {
             float y = 0.35f - i * 0.12f;
             if (i == selectedMenuItem) {
                 glColor3f(1.0f, 0.8f, 0.0f);
-                drawString(-0.40f, y, ">");                    // стрелка
+                drawString(-0.40f, y, ">");   
                 glColor3f(1.0f, 1.0f, 1.0f);
-                drawMenuItemString(-0.22f, y, diffItems[i]);  // пункт со смещением
+                drawMenuItemString(-0.22f, y, diffItems[i]);
             }
             else {
                 glColor3f(0.8f, 0.8f, 0.8f);
@@ -245,7 +233,6 @@ void drawMenu() {
         return;
     }
 
-    // Меню выбора режима
     if (selectingMode) {
         drawBackButton();
 
@@ -268,7 +255,6 @@ void drawMenu() {
         return;
     }
 
-    // Главное меню
     const char* items[] = { "New Game", "Records", "Help", "Exit" };
     for (int i = 0; i < 4; i++) {
         float y = 0.35f - i * 0.12f;
@@ -318,7 +304,6 @@ void drawRecords() {
     glColor3f(1.0f, 0.8f, 0.0f);
     drawCentered(0.85f, "RECORDS", 1.0f, 0.8f, 0.0f);
 
-    // Кнопки выбора сложности
     const char* diffLabels[] = { "Easy", "Medium", "Hard" };
     for (int i = 0; i < 3; i++) {
         float x = -0.5f + i * 0.35f;
@@ -335,33 +320,27 @@ void drawRecords() {
         drawString(x + 0.05f, y, diffLabels[i]);
     }
 
-    // Загружаем рекорды для отображения
     loadRecordsForDisplay();
     Record* records = getCurrentRecords();
 
-    // Шапка таблицы
     glColor3f(1.0f, 1.0f, 1.0f);
     drawString(-0.65f, 0.60f, "#");
     drawString(-0.55f, 0.60f, "Name");
     drawString(0.15f, 0.60f, "Score");
     drawString(0.55f, 0.60f, "Date");
 
-    // Разделительная линия
     glBegin(GL_LINES);
     glVertex2f(-0.70f, 0.57f);
     glVertex2f(0.85f, 0.57f);
     glEnd();
 
-    // Вывод записей
     for (int i = 0; i < 5; i++) {
         float y = 0.50f - i * 0.08f;
 
-        // Номер
         char numStr[5];
         sprintf(numStr, "%d.", i + 1);
         drawString(-0.65f, y, numStr);
 
-        // Имя (фиксированная ширина 12 символов)
         char nameStr[20];
         if (records[i].score > 0) {
             sprintf(nameStr, "%-12s", records[i].name);
@@ -371,14 +350,12 @@ void drawRecords() {
         }
         drawString(-0.55f, y, nameStr);
 
-        // Очки
         char scoreStr[10];
         if (records[i].score > 0) {
             sprintf(scoreStr, "%d", records[i].score);
             drawString(0.15f, y, scoreStr);
         }
 
-        // Дата
         if (records[i].score > 0 && strlen(records[i].date) > 0) {
             drawString(0.55f, y, records[i].date);
         }

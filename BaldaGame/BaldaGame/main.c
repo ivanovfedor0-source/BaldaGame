@@ -62,13 +62,12 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
 
-        // Ïîëó÷àåì ðàçìåð îêíà è íîðìàëèçóåì êîîðäèíàòû
         int width, height;
         glfwGetWindowSize(window, &width, &height);
         float nx = (float)xpos / width;
         float ny = 1.0f - (float)ypos / height;
 
-        // ========== ÏÐÎÂÅÐÊÀ ÊËÈÊÀ ÏÎ ÑÒÐÅËÊÅ "ÍÀÇÀÄ" ==========
+        //ÏÐÎÂÅÐÊÀ ÊËÈÊÀ ÏÎ ÑÒÐÅËÊÅ "ÍÀÇÀÄ"
         if (xpos >= 520 && xpos <= 570 && ypos >= 20 && ypos <= 60) {
             if (gameState == STATE_GAME && askingName && gameMode == MODE_PVE) {
                 askingName = 0;
@@ -99,7 +98,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
                 return;
             }
         }
-        // ========== ÊËÈÊ Â ÒÀÁËÈÖÅ ÐÅÊÎÐÄÎÂ (âûáîð ñëîæíîñòè) ==========
+        //ÊËÈÊ Â ÒÀÁËÈÖÅ ÐÅÊÎÐÄÎÂ (âûáîð ñëîæíîñòè)
         if (gameState == STATE_RECORDS && ny >= 0.85 && ny <= 0.89) {
             if (nx >= 0.32 && nx <= 0.42) {
                 setRecordsDifficulty(DIFFICULTY_EASY);
@@ -118,7 +117,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             }
         }
 
-        // ========== ÊËÈÊ Â ÃËÀÂÍÎÌ ÌÅÍÞ ==========
+        // ÊËÈÊ Â ÃËÀÂÍÎÌ ÌÅÍÞ
         if (gameState == STATE_MENU && !selectingMode && !selectingDifficulty) {
             int item = -1;
             if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;
@@ -133,7 +132,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             }
         }
 
-        // ========== ÊËÈÊ Â ÌÅÍÞ ÂÛÁÎÐÀ ÐÅÆÈÌÀ ==========
+        //ÊËÈÊ Â ÌÅÍÞ ÂÛÁÎÐÀ ÐÅÆÈÌÀ
         if (gameState == STATE_MENU && selectingMode && !selectingDifficulty) {
             int item = -1;
             if (ny >= 0.66 && ny <= 0.73 && nx >= 0.42 && nx <= 0.58) item = 0;
@@ -146,7 +145,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
             }
         }
 
-        // ========== ÊËÈÊ Â ÌÅÍÞ ÂÛÁÎÐÀ ÑËÎÆÍÎÑÒÈ ==========
+        // ÊËÈÊ Â ÌÅÍÞ ÂÛÁÎÐÀ ÑËÎÆÍÎÑÒÈ
         if (gameState == STATE_MENU && selectingDifficulty) {
             int item = -1;
             if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.58) item = 0;
@@ -159,7 +158,7 @@ void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) {
                 return;
             }
         }
-        // ========== ÊËÈÊ Â ÈÃÐÅ ==========
+        // ÊËÈÊ Â ÈÃÐÅ
         if (gameState == STATE_GAME && button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
@@ -189,19 +188,16 @@ void cursorPosCallback(GLFWwindow* window, double xpos, double ypos) {
     int newItem = -1;
 
     if (!selectingMode && !selectingDifficulty) {
-        // Ãëàâíîå ìåíþ (êîðîòêèå ïóíêòû: New Game, Records, Help, Exit)
         if (ny >= 0.66 && ny <= 0.72 && nx >= 0.45 && nx <= 0.56) newItem = 0;
         else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.45 && nx <= 0.54) newItem = 1;
         else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.45 && nx <= 0.50) newItem = 2;
         else if (ny >= 0.48 && ny <= 0.54 && nx >= 0.45 && nx <= 0.50) newItem = 3;
     }
     else if (selectingMode && !selectingDifficulty) {
-        // Âûáîð ðåæèìà (äëèííûå ïóíêòû)
         if (ny >= 0.66 && ny <= 0.73 && nx >= 0.43 && nx <= 0.58) newItem = 0;
         else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.43 && nx <= 0.58) newItem = 1;
     }
     else if (selectingDifficulty) {
-        // Âûáîð ñëîæíîñòè (êîðîòêèå ïóíêòû: Easy, Medium, Hard)
         if (ny >= 0.66 && ny <= 0.72 && nx >= 0.42 && nx <= 0.48) newItem = 0;
         else if (ny >= 0.60 && ny <= 0.66 && nx >= 0.42 && nx <= 0.51) newItem = 1;
         else if (ny >= 0.54 && ny <= 0.60 && nx >= 0.42 && nx <= 0.48) newItem = 2;
@@ -284,7 +280,6 @@ void botTurn() {
         display();
         glfwSwapBuffers(window);
 
-        // Æä¸ì íàæàòèÿ ïðîáåëà èëè Enter
         while (1) {
             glfwPollEvents();
             if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
@@ -303,7 +298,6 @@ void botTurn() {
 
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if (action == GLFW_PRESS) {
-        // ========== ÃËÎÁÀËÜÍÛÅ ÊËÀÂÈØÈ (ÐÀÁÎÒÀÞÒ ÂÅÇÄÅ) ==========
         switch (key) {
         case GLFW_KEY_F1:
             selectingMode = 0;
@@ -324,7 +318,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // ========== ÓÏÐÀÂËÅÍÈÅ Â ÒÀÁËÈÖÅ ÐÅÊÎÐÄÎÂ ==========
         if (gameState == STATE_RECORDS) {
             switch (key) {
             case GLFW_KEY_LEFT:
@@ -347,7 +340,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // ========== ÂÂÎÄ ÈÌÅÍÈ ==========
         if (gameState == STATE_GAME && askingName) {
             if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
                 if (nameInputLen < 15) {
@@ -367,7 +359,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 printf("Player name set to: %s\n", playerName);
             }
             else if (key == GLFW_KEY_LEFT) {
-                // Âîçâðàò ê âûáîðó ñëîæíîñòè
+
                 askingName = 0;
                 nameInputLen = 0;
                 nameInput[0] = '\0';
@@ -379,7 +371,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // ========== ÓÏÐÀÂËÅÍÈÅ Â ÌÅÍÞ ==========
+
         if (gameState == STATE_MENU) {
             switch (key) {
             case GLFW_KEY_UP:
@@ -389,7 +381,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                 menuDown();
                 break;
             case GLFW_KEY_LEFT:
-                menuBack();  // Âîçâðàò â ïðåäûäóùåå ìåíþ
+                menuBack();
                 break;
             case GLFW_KEY_ENTER:
                 menuSelect();
@@ -398,7 +390,6 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
             return;
         }
 
-        // ========== ÓÏÐÀÂËÅÍÈÅ Â ÈÃÐÅ ==========
         if (gameState == STATE_GAME && !askingName) {
             if (selectedRow != -1 && selectedCol != -1) {
                 unsigned char rusLetter = getRussianLetter(key);
@@ -421,13 +412,12 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                         if (points == 0) {
                             printf("No valid words found!\n");
                         }
-                        // Ïðèíóäèòåëüíî ïîêàçûâàåì õîä èãðîêà
+
                         displayWithHighlight(1);
                         glfwSwapBuffers(window);
                         glfwPollEvents();
                         Sleep(80);
 
-                        // Ïðîâåðÿåì, çàïîëíåíî ëè ïîëå
                         int gameOver = 1;
                         for (int i = 0; i < BOARD_SIZE; i++) {
                             for (int j = 0; j < BOARD_SIZE; j++) {
@@ -439,11 +429,11 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                         }
 
                         if (gameOver) {
-                            // Ïîêàçûâàåì ýêðàí îêîí÷àíèÿ
+
                             drawGameOver();
                             glfwSwapBuffers(window);
 
-                            // Æä¸ì íàæàòèÿ ïðîáåëà èëè Enter
+
                             while (1) {
                                 glfwPollEvents();
                                 if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS ||
@@ -468,7 +458,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
                             currentPlayer = 2;
                             botTurn();
 
-                            // Ïîñëå õîäà áîòà ïðîâåðÿåì îêîí÷àíèå èãðû
+
                             if (gameState == STATE_GAME_OVER) {
                                 displayWithHighlight(1);
                                 glfwSwapBuffers(window);

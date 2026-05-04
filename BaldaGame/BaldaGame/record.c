@@ -5,7 +5,7 @@
 #include <time.h>
 
 static Record records[5];
-static int currentDisplayDifficulty = 0;  // 0-Easy, 1-Medium, 2-Hard
+static int currentDisplayDifficulty = 0;
 
 const char* getFilename(int difficulty) {
     switch (difficulty) {
@@ -31,12 +31,11 @@ void loadRecords(int difficulty) {
         fclose(f);
     }
     else {
-        // Инициализируем пустые записи
         for (int i = 0; i < 5; i++) {
             strcpy(records[i].name, "---");
             records[i].score = 0;
             strcpy(records[i].date, "");
-            records[i].extra.intValue = 0;  // union для галочки
+            records[i].extra.intValue = 0;
         }
         saveRecords(difficulty);
     }
@@ -62,7 +61,6 @@ int isHighScore(int score, int difficulty) {
 void addRecord(const char* name, int score, int difficulty) {
     loadRecords(difficulty);
 
-    // 1. Проверяем, есть ли уже такой игрок в таблице
     int existingIndex = -1;
     for (int i = 0; i < 5; i++) {
         if (strcmp(records[i].name, name) == 0) {
@@ -70,21 +68,14 @@ void addRecord(const char* name, int score, int difficulty) {
             break;
         }
     }
-
-    // 2. Если игрок уже есть
     if (existingIndex != -1) {
-        // Если новый результат лучше — обновляем
         if (score > records[existingIndex].score) {
             records[existingIndex].score = score;
-
-            // Обновляем дату
             time_t t = time(NULL);
             struct tm* tm = localtime(&t);
             sprintf(records[existingIndex].date, "%02d.%02d.%04d",
                 tm->tm_mday, tm->tm_mon + 1, tm->tm_year + 1900);
 
-            // Сортируем заново (так как результат мог улучшиться)
-            // Простая сортировка пузырьком по убыванию очков
             for (int i = 0; i < 4; i++) {
                 for (int j = i + 1; j < 5; j++) {
                     if (records[i].score < records[j].score) {
@@ -103,18 +94,14 @@ void addRecord(const char* name, int score, int difficulty) {
         }
         return;
     }
-
-    // 3. Новый игрок — вставляем, если результат лучше худшего в топ-5
     int worstScore = records[4].score;
     if (score <= worstScore) {
         printf("Score %d is not enough for top 5 (worst score is %d)\n", score, worstScore);
         return;
     }
 
-    // Вставляем нового игрока
     for (int i = 0; i < 5; i++) {
         if (score > records[i].score) {
-            // Сдвигаем остальных вниз
             for (int j = 4; j > i; j--) {
                 records[j] = records[j - 1];
             }

@@ -327,7 +327,6 @@ void botMakeMoveMedium() {
     }
 }
 
-// Оценка хода для Hard бота (без изменения глобального состояния)
 int evaluateMoveHard(int row, int col, unsigned char letter, int player) {
     unsigned char oldLetter = board[row][col].letter;
     int oldOwner = board[row][col].owner;
@@ -337,7 +336,6 @@ int evaluateMoveHard(int row, int col, unsigned char letter, int player) {
 
     int bestPoints = 0;
 
-    // Запускаем BFS от ВСЕХ клеток с буквами
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter == 0) continue;
@@ -361,7 +359,6 @@ int evaluateMoveHard(int row, int col, unsigned char letter, int player) {
                 BFSStateEval curr = queue[front++];
 
                 if (curr.len >= 3 && curr.len <= 8) {
-                    // Проверяем, содержит ли слово НОВУЮ клетку
                     if (curr.visited[row][col]) {
                         if (isWordInDictionary(curr.word) && !isWordUsedGlobal(curr.word)) {
                             if (curr.len > bestPoints) bestPoints = curr.len;

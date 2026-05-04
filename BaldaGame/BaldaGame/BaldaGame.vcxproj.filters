@@ -66,7 +66,7 @@
       <Filter>Исходные файлы</Filter>
     </ClInclude>
     <ClInclude Include="record.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>Исходные файлы</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

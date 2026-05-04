@@ -53,7 +53,6 @@ void menuDown() {
 }
 
 void menuSelect() {
-    // Выбор сложности
     if (selectingDifficulty) {
         switch (selectedMenuItem) {
         case 0:
@@ -75,7 +74,6 @@ void menuSelect() {
         return;
     }
 
-    // Выбор режима (PVP / PVE)
     if (selectingMode) {
         switch (selectedMenuItem) {
         case 0:
@@ -97,7 +95,6 @@ void menuSelect() {
         return;
     }
 
-    // Главное меню
     switch (selectedMenuItem) {
     case 0:
         selectingMode = 1;
@@ -116,15 +113,12 @@ void menuSelect() {
 }
 void menuBack() {
     if (selectingDifficulty) {
-        // Из выбора сложности → в выбор режима
         selectingDifficulty = 0;
         selectingMode = 1;
         selectedMenuItem = 0;
     }
     else if (selectingMode) {
-        // Из выбора режима → в главное меню
         selectingMode = 0;
         selectedMenuItem = 0;
     }
-    // В главном меню стрелка влево не делает ничего
 }

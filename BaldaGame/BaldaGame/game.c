@@ -161,7 +161,6 @@ int checkAndAddWordDirect(int row, int col, int player) {
 
     printf("\n--- Found candidates ---\n");
 
-    // Запускаем BFS от КАЖДОЙ клетки с буквой
     for (int startRow = 0; startRow < BOARD_SIZE; startRow++) {
         for (int startCol = 0; startCol < BOARD_SIZE; startCol++) {
             if (board[startRow][startCol].letter == 0) continue;
@@ -253,7 +252,6 @@ int checkAndAddWordDirect(int row, int col, int player) {
 
     printf(">>> Total +%d points!\n", totalPoints);
 
-    // ========== ПРОВЕРКА ОКОНЧАНИЯ ИГРЫ ==========
     if (isGameOver()) {
         printf("\n========================================\n");
         printf("GAME OVER! No empty cells left.\n");
@@ -354,14 +352,13 @@ void clearSelection() {
     currentInputLetter = '\0';
 }
 
-// Проверка, заполнено ли всё поле
 int isGameOver() {
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             if (board[i][j].letter == 0) {
-                return 0; // Есть хотя бы одна пустая клетка — игра продолжается
+                return 0; 
             }
         }
     }
-    return 1; // Нет пустых клеток — игра окончена
+    return 1;
 }
